@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betonchel", "Betonchel\Betonchel.csproj", "{F44C39CE-641F-48AB-B547-15484B545FE8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betonchel.API", "Betonchel.API\Betonchel.API.csproj", "{F44C39CE-641F-48AB-B547-15484B545FE8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
