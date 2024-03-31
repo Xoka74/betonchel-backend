@@ -1,12 +1,10 @@
-using Microsoft.EntityFrameworkCore;
 using Betonchel.Domain;
-using Betonchel.Domain.Models;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<DomainContext>(
-    opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("BetonchelDB"))
+builder.Services.AddDbContext<BetonchelContext>(
+    opt => opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
-
 
 var app = builder.Build();
 

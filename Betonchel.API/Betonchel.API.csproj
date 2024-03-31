@@ -18,6 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Betonchel.Data\Betonchel.Data.csproj" />
       <ProjectReference Include="..\Betonchel.Domain\Betonchel.Domain.csproj" />
     </ItemGroup>
 
