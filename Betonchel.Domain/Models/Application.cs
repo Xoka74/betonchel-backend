@@ -1,23 +1,21 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace Betonchel.Domain.Models;
+﻿namespace Betonchel.Domain.Models;
 
 public class Application
 {
-    public int ApplicationId { get; init; }
-    public string CustomerName { get; init; }
-    public string ManagerName { get; init; }
-    public int ConcreteId { get; init; }
-    public double TotalPrice { get; init; }
-    public int ConcretePumpId { get; init; }
-    [Column(TypeName = "json")] 
-    public string ContactDate { get; init; }
-    [Column(TypeName = "real")] 
-    public float Volume { get; init; }
-    [Column(TypeName = "json")] 
-    public string DeliveryAddress { get; init; }
-    [Column(TypeName = "timestamptz")]
-    public DateTime DeliveryDate { get; init; }
-    [Column(TypeName = "timestamptz")]
-    public DateTime ApplicationCreationDate { get; init; }
+    public int Id { get; set; }
+    public string CustomerName { get; set; }
+    public int EmployeeId { get; set; }
+    public int ConcreteGradeId { get; set; }
+    public double TotalPrice { get; set; }
+    public int ConcretePumpId { get; set; }
+    public string ContactData { get; set; }
+    public float Volume { get; set; }
+    public string? DeliveryAddress { get; set; }
+    public DateTime DeliveryDate { get; set; }
+    public DateTime ApplicationCreationDate { get; set; }
+    public string? Description { get; set; }
+
+    public ConcreteGrade ConcreteGrade { get; set; }
+    public ConcretePump ConcretePump { get; set; }
+    public Employee Employee { get; set; }
 }

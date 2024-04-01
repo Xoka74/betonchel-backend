@@ -1,4 +1,4 @@
-using Betonchel.Domain;
+using Betonchel.Data;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

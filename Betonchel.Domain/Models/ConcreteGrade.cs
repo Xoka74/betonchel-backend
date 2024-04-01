@@ -2,10 +2,14 @@
 
 public class ConcreteGrade
 {
-    public int ConcreteGradeId { get; init; }
-    public string Make { get; init; }
+    public int Id { get; set; }
+    public string Make { get; set; }
     public string Class { get; set; }
-    public int WaterproofId { get; init; }
-    public int FrostResistanceId { get; set; }
-    public double PricePerCubicMeter { get; init; }
+    public int WaterproofTypeId { get; set; }
+    public int FrostResistanceTypeId { get; set; }
+    public double PricePerCubicMeter { get; set; }
+
+    public Application Application { get; set; }
+    public WaterproofType WaterproofType { get; set; }
+    public FrostResistanceType FrostResistanceType { get; set; }
 }
