@@ -19,5 +19,12 @@ internal class ConcretePumpConfiguration : IEntityTypeConfiguration<ConcretePump
         builder.Property(cp => cp.PricePerHour)
             .IsRequired();
         builder.HasCheckConstraint("PricePerHour", "PricePerHour >= 0");
+        
+        
+        builder.HasMany(cp => cp.Applications)
+            .WithOne(a => a.ConcretePump)
+            .HasForeignKey(a => a.ConcretePumpId)
+            .HasPrincipalKey(cp => cp.Id)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

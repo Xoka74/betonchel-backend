@@ -10,5 +10,5 @@ public class ConcretePump
     public float? PipeLength { get; set; }
     public double PricePerHour { get; set; }
 
-    public Application Application { get; set; }
+    public ICollection<Application> Applications { get; set; }
 }

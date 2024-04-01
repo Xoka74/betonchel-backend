@@ -16,6 +16,6 @@ public class Application
     public string? Description { get; set; }
 
     public ConcreteGrade ConcreteGrade { get; set; }
-    public ConcretePump ConcretePump { get; set; }
-    public Employee Employee { get; set; }
+    public ConcretePump? ConcretePump { get; set; }
+    public User User { get; set; }
 }

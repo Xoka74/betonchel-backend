@@ -10,11 +10,13 @@ internal class ConcreteGradeConfiguration : IEntityTypeConfiguration<ConcreteGra
     {
         builder.HasKey(cg => cg.Id);
 
-        builder.Property(cg => cg.Make)
+        builder.Property(cg => cg.Mark)
+            .HasColumnType("varchar")
             .HasMaxLength(10)
             .IsRequired();
 
         builder.Property(cg => cg.Class)
+            .HasColumnType("varchar")
             .HasMaxLength(10)
             .IsRequired();
 
@@ -28,18 +30,23 @@ internal class ConcreteGradeConfiguration : IEntityTypeConfiguration<ConcreteGra
             .IsRequired();
 
         builder.HasCheckConstraint("PricePerCubicMeter", "PricePerCubicMeter >= 0");
+        
+        builder.HasMany(cg => cg.Applications)
+            .WithOne(a => a.ConcreteGrade)
+            .HasForeignKey(a => a.ConcreteGradeId)
+            .HasPrincipalKey(cg => cg.Id)
+            .OnDelete(DeleteBehavior.Restrict);
 
-        builder
-            .HasOne(cg => cg.WaterproofType)
-            .WithOne(wt => wt.ConcreteGrade)
-            .HasForeignKey<ConcreteGrade>(cg => cg.WaterproofTypeId)
-            .HasPrincipalKey<WaterproofType>(wt => wt.Id)
+        builder.HasOne(cg => cg.WaterproofType)
+            .WithMany(wt => wt.ConcreteGrades)
+            .HasForeignKey(cg => cg.WaterproofTypeId)
+            .HasPrincipalKey(wt => wt.Id)
             .OnDelete(DeleteBehavior.Restrict);
         
         builder.HasOne(cg => cg.FrostResistanceType)
-            .WithOne(frt => frt.ConcreteGrade)
-            .HasForeignKey<ConcreteGrade>(cg => cg.FrostResistanceTypeId)
-            .HasPrincipalKey<FrostResistanceType>(frt => frt.Id)
+            .WithMany(frt => frt.ConcreteGrades)
+            .HasForeignKey(cg => cg.FrostResistanceTypeId)
+            .HasPrincipalKey(frt => frt.Id)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

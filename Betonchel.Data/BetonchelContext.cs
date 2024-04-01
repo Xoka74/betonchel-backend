@@ -11,6 +11,7 @@ public class BetonchelContext : DbContext
     public DbSet<FrostResistanceType> FrostResistanceTypes { get; set; }
     public DbSet<WaterproofType> WaterproofTypes { get; set; }
     public DbSet<ConcreteGrade> ConcreteGrades { get; set; }
+    public DbSet<User> Users { get; set; }
 
     public BetonchelContext(DbContextOptions<BetonchelContext> options) : base(options)
     {

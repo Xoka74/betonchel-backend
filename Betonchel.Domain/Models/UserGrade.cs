@@ -1,6 +1,6 @@
 ﻿namespace Betonchel.Domain.Models;
 
-public enum EmployeeGrade
+public enum UserGrade
 {
     Manager,
     Admin

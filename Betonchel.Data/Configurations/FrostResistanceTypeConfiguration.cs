@@ -11,6 +11,7 @@ internal class FrostResistanceTypeConfiguration : IEntityTypeConfiguration<Frost
         builder.HasKey(frt => frt.Id);
 
         builder.Property(wt => wt.Name)
+            .HasColumnType("varchar")
             .HasMaxLength(10)
             .IsRequired();
     }

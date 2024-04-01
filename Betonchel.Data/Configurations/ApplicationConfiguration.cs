@@ -51,22 +51,10 @@ internal class ApplicationConfiguration : IEntityTypeConfiguration<Application>
             .IsRequired();
 
         builder.Property(a => a.Description)
+            .HasColumnType("varchar")
             .HasMaxLength(512);
 
-
-        builder.HasOne(a => a.ConcreteGrade)
-            .WithOne(cg => cg.Application)
-            .HasForeignKey<Application>(a => a.ConcreteGradeId)
-            .HasPrincipalKey<ConcreteGrade>(cg => cg.Id)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasOne(a => a.ConcretePump)
-            .WithOne(cp => cp.Application)
-            .HasForeignKey<Application>(a => a.ConcretePumpId)
-            .HasPrincipalKey<ConcretePump>(cp => cp.Id)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasOne(a => a.Employee)
+        builder.HasOne(a => a.User)
             .WithMany(e => e.Application)
             .HasForeignKey(a => a.EmployeeId)
             .HasPrincipalKey(e => e.Id)

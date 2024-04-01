@@ -4,13 +4,14 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Betonchel.Data.Configurations;
 
-internal class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
+internal class EmployeeConfiguration : IEntityTypeConfiguration<User>
 {
-    public void Configure(EntityTypeBuilder<Employee> builder)
+    public void Configure(EntityTypeBuilder<User> builder)
     {
         builder.HasKey(e => e.Id);
         
         builder.Property(e => e.Name)
+            .HasColumnType("varchar")
             .HasMaxLength(50)
             .IsRequired();
 
@@ -18,7 +19,7 @@ internal class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
             .HasColumnType("json")
             .IsRequired();
 
-        builder.Property(e => e.EmployeeGrade)
+        builder.Property(e => e.UserGrade)
             .IsRequired();
     }
 }
