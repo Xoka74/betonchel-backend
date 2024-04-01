@@ -2,6 +2,10 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betonchel.API", "Betonchel.API\Betonchel.API.csproj", "{F44C39CE-641F-48AB-B547-15484B545FE8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betonchel.Domain", "Betonchel.Domain\Betonchel.Domain.csproj", "{45C03E40-BD08-491F-83EB-3C1119E0A0EC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Betonchel.Data", "Betonchel.Data\Betonchel.Data.csproj", "{62263C53-D6C0-4219-B0F6-99648659C31F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +16,13 @@ Global
 		{F44C39CE-641F-48AB-B547-15484B545FE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F44C39CE-641F-48AB-B547-15484B545FE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F44C39CE-641F-48AB-B547-15484B545FE8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{45C03E40-BD08-491F-83EB-3C1119E0A0EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45C03E40-BD08-491F-83EB-3C1119E0A0EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45C03E40-BD08-491F-83EB-3C1119E0A0EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45C03E40-BD08-491F-83EB-3C1119E0A0EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62263C53-D6C0-4219-B0F6-99648659C31F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62263C53-D6C0-4219-B0F6-99648659C31F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62263C53-D6C0-4219-B0F6-99648659C31F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62263C53-D6C0-4219-B0F6-99648659C31F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
