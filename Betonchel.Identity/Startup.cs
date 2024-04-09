@@ -56,15 +56,24 @@ public class Startup
                     RefreshTokenExpiration = TokenExpiration.Sliding,
                     AbsoluteRefreshTokenLifetime = 3600,
                     SlidingRefreshTokenLifetime = 7200,
-                    AllowedGrantTypes = GrantTypes.ResourceOwnerPassword
+                    AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
                 }
+            });
+        
+        services.AddAuthentication("Bearer")
+            .AddJwtBearer("Bearer", options =>
+            {
+                options.Authority = "http://localhost:5073"; // Укажите соответствующий URL
+                options.RequireHttpsMetadata = false; // Временно для отладки
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateAudience = false // Настройте соответственно вашим требованиям
+                };
             });
         services.AddAuthorization(options =>
         {
-            options.AddPolicy("admin", 
-                policy => policy.RequireClaim("admin"));
+            options.AddPolicy("admin", policy => policy.RequireRole("admin"));
         });
-
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
