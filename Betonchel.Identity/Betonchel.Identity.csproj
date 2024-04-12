@@ -11,6 +11,11 @@
       <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
       <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.5" />
       <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.10" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.15">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.4" />
     </ItemGroup>
 
 </Project>

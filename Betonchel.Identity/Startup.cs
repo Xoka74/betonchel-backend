@@ -3,15 +3,24 @@ using IdentityModel;
 using IdentityServer4.Models;
 using IdentityServer4.Test;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Configuration;
 
 namespace Betonchel.Identity;
 public class Startup
 {
+    private readonly IConfiguration _configuration; 
+
+    public Startup(IConfiguration configuration)
+    {
+        _configuration = configuration; 
+    }
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddControllers();
-
+        services.AddDbContext<DbContext>(options =>
+            options.UseNpgsql(_configuration.GetConnectionString("DefaultConnection")));
         services.AddIdentityServer()
             .AddDeveloperSigningCredential()
             .AddInMemoryApiScopes(new[] { new ApiScope("api1", userClaims: new[] { JwtClaimTypes.Role }),})

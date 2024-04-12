@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using IdentityModel.Client;
 using System.IdentityModel.Tokens.Jwt;
+using Betonchel.Api.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using Newtonsoft.Json;
 
@@ -39,6 +41,13 @@ public class RefreshTokenModel
 [ApiController]
 public class AuthController : ControllerBase
 {
+    private readonly DbContext _dbContext;
+
+    public AuthController(DbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+    
     [HttpPost("login")]
     public async Task<IActionResult> Login()
     {
@@ -111,26 +120,26 @@ public class AuthController : ControllerBase
         return StatusCode((int)response.StatusCode);
     }
     
-    [HttpPost("add1")]
-    [Authorize(AuthenticationSchemes = "Bearer")]
-    public IActionResult Add1([FromBody] TokenRequestModel request)
+    [HttpPost("addUser")]
+    [Authorize(Policy = "admin")]
+    public async Task<IActionResult> AddUser([FromBody] User user)
     {
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var accessToken = request.access_token;
-        var token = tokenHandler.ReadJwtToken(accessToken);
-        var role = token.Claims.FirstOrDefault(claim => claim.Type == "role")?.Value;
-        if (role != "admin")
-        {
-            return BadRequest("No access right");
-        }
-        
-        return Ok("Админ, может добавлять менеджеров");
+        user.DateOfBirth = DateTime.SpecifyKind(user.DateOfBirth, DateTimeKind.Utc);
+        _dbContext.AddUser(user);
+        return Ok($"{user.FirstName} {user.LastName} added with role: {user.Role}");
     }
     
-    [HttpPost("add2")]
+    [HttpPost("removeUser")]
     [Authorize(Policy = "admin")]
-    public IActionResult Add2()
+    public async Task<IActionResult> RemoveUser([FromBody] User user)
     {
-        return Ok("Админ, может добавлять менеджеров");
+        var userToDelete = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
+        Console.WriteLine(_dbContext.Users);
+        if (userToDelete == null)
+        {
+            return NotFound("User not found");
+        }
+        _dbContext.RemoveUser(userToDelete);
+        return Ok($"{user.FirstName} {user.LastName} deleted");
     }
 }
