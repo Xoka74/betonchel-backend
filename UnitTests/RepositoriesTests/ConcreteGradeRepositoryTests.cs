@@ -36,16 +36,25 @@ public class ConcreteGradeRepositoryTests
         var repo = new ConcreteGradeRepository(dataContext);
         // foreach (var concreteGrade in repo.GetAll())
         // {
-        //     Console.WriteLine(concreteGrade);
+        //     Console.WriteLine(
+        //         $"{concreteGrade} {concreteGrade.WaterproofType.Name} {concreteGrade.FrostResistanceType.Name}"
+        //     );
         // }
         // var t1 = repo.GetBy(12);
-        // var cg = repo.GetBy(1);
+        // var cg = repo.GetBy(2);
+        // Console.WriteLine(
+        //     $"{cg} {cg.WaterproofType.Name} {cg.FrostResistanceType.Name}"
+        // );
         // cg.Mark = "213";
         var model = new ConcreteGrade()
         {
-            Mark = "М-100", Class = "В7,5", WaterproofTypeId = 1, FrostResistanceTypeId = 1, PricePerCubicMeter = 12
+            Id=1, Mark = "М-100", Class = "В7,5", WaterproofTypeId = 2, FrostResistanceTypeId = 1, PricePerCubicMeter = 12
         };
-        repo.Create(model)
-            .SaveChanges();
+        repo.Create(model);
+        var cg = repo.GetBy(1);
+        Console.WriteLine(
+            $"{cg} {cg.WaterproofType.Name} {cg.FrostResistanceType.Name}"
+        );
+        //     .SaveChanges();
     }
 }

@@ -18,6 +18,6 @@ public class Application : Entity<int>
     public ApplicationStatus Status { get; set; }
 
     public ConcreteGrade ConcreteGrade { get; set; }
-    public ConcretePump ConcretePump { get; set; }
+    public ConcretePump? ConcretePump { get; set; }
     public User User { get; set; }
 }

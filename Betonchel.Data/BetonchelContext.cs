@@ -17,6 +17,9 @@ public class BetonchelContext : DbContext
     {
     }
 
+    // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    //     => optionsBuilder.LogTo(Console.WriteLine);
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new ApplicationConfiguration());
@@ -25,7 +28,7 @@ public class BetonchelContext : DbContext
         modelBuilder.ApplyConfiguration(new EmployeeConfiguration());
         modelBuilder.ApplyConfiguration(new FrostResistanceTypeConfiguration());
         modelBuilder.ApplyConfiguration(new WaterproofTypeConfiguration());
-        
+
         base.OnModelCreating(modelBuilder);
     }
 }
