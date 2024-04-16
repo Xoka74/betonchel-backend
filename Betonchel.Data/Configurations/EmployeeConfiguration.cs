@@ -19,7 +19,7 @@ internal class EmployeeConfiguration : IEntityTypeConfiguration<User>
             .HasColumnType("json")
             .IsRequired();
 
-        builder.Property(e => e.UserGrade)
+        builder.Property(e => e.Grade)
             .IsRequired();
     }
 }

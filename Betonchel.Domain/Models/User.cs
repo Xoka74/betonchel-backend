@@ -1,11 +1,12 @@
-﻿namespace Betonchel.Domain.Models;
+﻿using Betonchel.Domain.BaseModels;
 
-public class User
+namespace Betonchel.Domain.Models;
+
+public class User : Entity<int>
 {
-    public int Id;
     public string Name;
     public string ContactData;
-    public UserGrade UserGrade;
+    public UserGrade Grade;
     
     public ICollection<Application> Application;
 }

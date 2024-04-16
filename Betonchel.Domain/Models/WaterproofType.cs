@@ -1,8 +1,9 @@
-﻿namespace Betonchel.Domain.Models;
+﻿using Betonchel.Domain.BaseModels;
 
-public class WaterproofType
+namespace Betonchel.Domain.Models;
+
+public class WaterproofType : Entity<int>
 {
-    public int Id { get; set; }
     public string Name { get; set; }
 
     public ICollection<ConcreteGrade> ConcreteGrades { get; set; }

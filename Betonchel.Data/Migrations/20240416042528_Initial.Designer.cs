@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Betonchel.Data.Migrations
 {
     [DbContext(typeof(BetonchelContext))]
-    [Migration("20240401154305_AddUser")]
-    partial class AddUser
+    [Migration("20240416042528_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -62,11 +62,16 @@ namespace Betonchel.Data.Migrations
                         .HasMaxLength(512)
                         .HasColumnType("varchar");
 
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("integer");
+                    b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
 
                     b.Property<double>("TotalPrice")
                         .HasColumnType("numeric");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
 
                     b.Property<float>("Volume")
                         .HasColumnType("real");
@@ -77,15 +82,15 @@ namespace Betonchel.Data.Migrations
 
                     b.HasIndex("ConcretePumpId");
 
-                    b.HasIndex("EmployeeId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Applications");
 
-                    b.HasCheckConstraint("DeliveryDate", "DeliveryDate > now()");
+                    b.HasCheckConstraint("CK_DeliveryDate", "\"DeliveryDate\" > now()");
 
-                    b.HasCheckConstraint("TotalPrice", "TotalPrice >= 0");
+                    b.HasCheckConstraint("CK_TotalPrice", "\"TotalPrice\" >= 0");
 
-                    b.HasCheckConstraint("Volume", "Volume >= 0");
+                    b.HasCheckConstraint("CK_Volume", "\"Volume\" >= 0");
                 });
 
             modelBuilder.Entity("Betonchel.Domain.Models.ConcreteGrade", b =>
@@ -123,7 +128,7 @@ namespace Betonchel.Data.Migrations
 
                     b.ToTable("ConcreteGrades");
 
-                    b.HasCheckConstraint("PricePerCubicMeter", "PricePerCubicMeter >= 0");
+                    b.HasCheckConstraint("CK_PricePerCubicMeter", "\"PricePerCubicMeter\" >= 0");
                 });
 
             modelBuilder.Entity("Betonchel.Domain.Models.ConcretePump", b =>
@@ -147,11 +152,11 @@ namespace Betonchel.Data.Migrations
 
                     b.ToTable("ConcretePumps");
 
-                    b.HasCheckConstraint("MaximumCapacity", "MaximumCapacity >= 0");
+                    b.HasCheckConstraint("CK_MaximumCapacity", "\"MaximumCapacity\" >= 0");
 
-                    b.HasCheckConstraint("PipeLength", "PipeLength >= 0");
+                    b.HasCheckConstraint("CK_PipeLength", "\"PipeLength\" >= 0");
 
-                    b.HasCheckConstraint("PricePerHour", "PricePerHour >= 0");
+                    b.HasCheckConstraint("CK_PricePerHour", "\"PricePerHour\" >= 0");
                 });
 
             modelBuilder.Entity("Betonchel.Domain.Models.FrostResistanceType", b =>
@@ -184,13 +189,13 @@ namespace Betonchel.Data.Migrations
                         .IsRequired()
                         .HasColumnType("json");
 
+                    b.Property<int>("Grade")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("varchar");
-
-                    b.Property<int>("UserGrade")
-                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -231,7 +236,7 @@ namespace Betonchel.Data.Migrations
 
                     b.HasOne("Betonchel.Domain.Models.User", "User")
                         .WithMany("Application")
-                        .HasForeignKey("EmployeeId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 

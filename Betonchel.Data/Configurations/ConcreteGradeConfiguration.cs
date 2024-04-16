@@ -29,7 +29,7 @@ internal class ConcreteGradeConfiguration : IEntityTypeConfiguration<ConcreteGra
         builder.Property(cg => cg.PricePerCubicMeter)
             .IsRequired();
 
-        builder.HasCheckConstraint("PricePerCubicMeter", "PricePerCubicMeter >= 0");
+        builder.HasCheckConstraint("CK_PricePerCubicMeter", "\"PricePerCubicMeter\" >= 0");
         
         builder.HasMany(cg => cg.Applications)
             .WithOne(a => a.ConcreteGrade)
