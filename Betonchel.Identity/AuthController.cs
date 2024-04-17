@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using IdentityModel.Client;
 using System.IdentityModel.Tokens.Jwt;
-using Betonchel.Api.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using Newtonsoft.Json;
@@ -120,26 +119,26 @@ public class AuthController : ControllerBase
         return StatusCode((int)response.StatusCode);
     }
     
-    [HttpPost("addUser")]
-    [Authorize(Policy = "admin")]
-    public async Task<IActionResult> AddUser([FromBody] User user)
-    {
-        user.DateOfBirth = DateTime.SpecifyKind(user.DateOfBirth, DateTimeKind.Utc);
-        _dbContext.AddUser(user);
-        return Ok($"{user.FirstName} {user.LastName} added with role: {user.Role}");
-    }
-    
-    [HttpPost("removeUser")]
-    [Authorize(Policy = "admin")]
-    public async Task<IActionResult> RemoveUser([FromBody] User user)
-    {
-        var userToDelete = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
-        Console.WriteLine(_dbContext.Users);
-        if (userToDelete == null)
-        {
-            return NotFound("User not found");
-        }
-        _dbContext.RemoveUser(userToDelete);
-        return Ok($"{user.FirstName} {user.LastName} deleted");
-    }
+    // [HttpPost("addUser")]
+    // [Authorize(Policy = "admin")]
+    // public async Task<IActionResult> AddUser([FromBody] User user)
+    // {
+    //     user.DateOfBirth = DateTime.SpecifyKind(user.DateOfBirth, DateTimeKind.Utc);
+    //     _dbContext.AddUser(user);
+    //     return Ok($"{user.FirstName} {user.LastName} added with role: {user.Role}");
+    // }
+    //
+    // [HttpPost("removeUser")]
+    // [Authorize(Policy = "admin")]
+    // public async Task<IActionResult> RemoveUser([FromBody] User user)
+    // {
+    //     var userToDelete = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
+    //     Console.WriteLine(_dbContext.Users);
+    //     if (userToDelete == null)
+    //     {
+    //         return NotFound("User not found");
+    //     }
+    //     _dbContext.RemoveUser(userToDelete);
+    //     return Ok($"{user.FirstName} {user.LastName} deleted");
+    // }
 }
