@@ -1,4 +1,4 @@
-﻿using Betonchel.Domain.Models;
+﻿using Betonchel.Domain.DBModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

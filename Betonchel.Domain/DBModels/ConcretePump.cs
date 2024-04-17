@@ -1,8 +1,6 @@
 ﻿using Betonchel.Domain.BaseModels;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Betonchel.Domain.Models;
+namespace Betonchel.Domain.DBModels;
 
 public class ConcretePump : Entity<int>
 {

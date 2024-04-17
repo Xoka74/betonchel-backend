@@ -1,8 +1,8 @@
 ﻿using Betonchel.Domain.BaseModels;
 
-namespace Betonchel.Domain.Models;
+namespace Betonchel.Domain.DBModels;
 
-public class WaterproofType : Entity<int>
+public class FrostResistanceType : Entity<int>
 {
     public string Name { get; set; }
 

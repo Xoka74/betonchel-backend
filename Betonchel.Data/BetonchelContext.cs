@@ -1,6 +1,6 @@
 ﻿using Betonchel.Data.Configurations;
+using Betonchel.Domain.DBModels;
 using Microsoft.EntityFrameworkCore;
-using Betonchel.Domain.Models;
 
 namespace Betonchel.Data;
 

@@ -1,6 +1,6 @@
 ﻿using Betonchel.Domain.BaseModels;
 
-namespace Betonchel.Domain.Models;
+namespace Betonchel.Domain.DBModels;
 
 public class User : Entity<int>
 {

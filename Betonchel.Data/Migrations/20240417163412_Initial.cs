@@ -170,6 +170,12 @@ namespace Betonchel.Data.Migrations
                 name: "IX_ConcreteGrades_WaterproofTypeId",
                 table: "ConcreteGrades",
                 column: "WaterproofTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Email",
+                table: "Users",
+                column: "Email",
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

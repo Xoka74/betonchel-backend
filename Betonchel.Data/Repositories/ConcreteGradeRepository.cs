@@ -1,5 +1,5 @@
 ﻿using Betonchel.Domain.BaseModels;
-using Betonchel.Domain.Models;
+using Betonchel.Domain.DBModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace Betonchel.Data.Repositories;

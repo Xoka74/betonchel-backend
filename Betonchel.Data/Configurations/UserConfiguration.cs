@@ -1,4 +1,4 @@
-﻿using Betonchel.Domain.Models;
+﻿using Betonchel.Domain.DBModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -18,6 +18,7 @@ internal class UserConfiguration : IEntityTypeConfiguration<User>
             .HasColumnType("varchar(50)")
             .IsRequired();
         builder.HasCheckConstraint("CK_Email", "\"Email\" LIKE '%@%'");
+        builder.HasIndex(user => user.Email).IsUnique();
 
         builder.Property(e => e.Grade)
             .IsRequired();
