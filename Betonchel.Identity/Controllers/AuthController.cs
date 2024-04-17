@@ -1,52 +1,23 @@
-using System.ComponentModel.DataAnnotations;
+using Betonchel.Data.Repositories;
+using Betonchel.Domain.DBModels;
+using Betonchel.Domain.JsonModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-using IdentityModel.Client;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
 using Newtonsoft.Json;
 
 namespace Betonchel.Identity.Controllers;
-
-public class TokenRequestModel
-{
-    public string access_token { get; set; }
-}
-
-public class LoginModel
-{
-    [Required]
-    public string Username { get; set; }
-
-    [Required]
-    public string Password { get; set; }
-}
-
-public class TokenResponse
-{
-    public string access_token { get; set; }
-    public string refresh_token { get; set; }
-}
-
-public class RefreshTokenModel
-{
-    public string RefreshToken { get; set; }
-}
-
 
 [Route("auth")]
 [ApiController]
 public class AuthController : ControllerBase
 {
-    private readonly DbContext _dbContext;
+    private readonly UserRepository repository;
 
-    public AuthController(DbContext dbContext)
+    public AuthController(UserRepository repository)
     {
-        _dbContext = dbContext;
+        this.repository = repository;
     }
-    
+
     [HttpPost("login")]
     public async Task<IActionResult> Login()
     {
@@ -56,7 +27,7 @@ public class AuthController : ControllerBase
     [HttpPost("refreshToken")]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenModel model)
     {
-        var baseUrl  = "http://localhost:5073";
+        var baseUrl = "http://localhost:5073";
         var httpClient = new HttpClient();
         var tokenEndpoint = "/connect/token";
         var content = new FormUrlEncodedContent(new[]
@@ -66,30 +37,30 @@ public class AuthController : ControllerBase
             new KeyValuePair<string, string>("grant_type", "refresh_token"),
             new KeyValuePair<string, string>("refresh_token", model.RefreshToken),
         });
-    
+
         var response = await httpClient.PostAsync(baseUrl + tokenEndpoint, content);
-    
+
         if (response.IsSuccessStatusCode)
         {
             var responseContent = await response.Content.ReadAsStringAsync();
             var tokenResponse = JsonConvert.DeserializeObject<TokenResponse>(responseContent);
-        
-            var tokens = new 
+
+            var tokens = new
             {
-                tokenResponse.access_token, tokenResponse.refresh_token
+                access_token = tokenResponse.AccessToken, refresh_token = tokenResponse.RefreshToken
             };
 
             return Ok(tokens);
         }
-    
+
         return StatusCode((int)response.StatusCode);
     }
 
-    
+
     [HttpPost("getAccessRefreshToken")]
     public async Task<IActionResult> GetAccessRefresh([FromBody] LoginModel model)
     {
-        var baseUrl  = "http://localhost:5073";
+        var baseUrl = "http://localhost:5073";
         var httpClient = new HttpClient();
         var tokenEndpoint = "/connect/token";
         var content = new FormUrlEncodedContent(new[]
@@ -100,45 +71,40 @@ public class AuthController : ControllerBase
             new KeyValuePair<string, string>("username", model.Username),
             new KeyValuePair<string, string>("password", model.Password),
         });
-        
+
         var response = await httpClient.PostAsync(baseUrl + tokenEndpoint, content);
-        
+
         if (response.IsSuccessStatusCode)
         {
             var responseContent = await response.Content.ReadAsStringAsync();
             var tokenResponse = JsonConvert.DeserializeObject<TokenResponse>(responseContent);
-            
-            var tokens = new 
+
+            var tokens = new
             {
-                tokenResponse.access_token, tokenResponse.refresh_token
+                access_token = tokenResponse.AccessToken, refresh_token = tokenResponse.RefreshToken
             };
 
             return Ok(tokens);
         }
-        
+
         return StatusCode((int)response.StatusCode);
     }
-    
-    // [HttpPost("addUser")]
-    // [Authorize(Policy = "admin")]
-    // public async Task<IActionResult> AddUser([FromBody] User user)
-    // {
-    //     user.DateOfBirth = DateTime.SpecifyKind(user.DateOfBirth, DateTimeKind.Utc);
-    //     _dbContext.AddUser(user);
-    //     return Ok($"{user.FirstName} {user.LastName} added with role: {user.Role}");
-    // }
-    //
-    // [HttpPost("removeUser")]
-    // [Authorize(Policy = "admin")]
-    // public async Task<IActionResult> RemoveUser([FromBody] User user)
-    // {
-    //     var userToDelete = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
-    //     Console.WriteLine(_dbContext.Users);
-    //     if (userToDelete == null)
-    //     {
-    //         return NotFound("User not found");
-    //     }
-    //     _dbContext.RemoveUser(userToDelete);
-    //     return Ok($"{user.FirstName} {user.LastName} deleted");
-    // }
+
+    [HttpPost("addUser")]
+    [Authorize(Policy = "admin")]
+    public async Task<IActionResult> AddUser([FromBody] User user)
+    {
+        repository.Create(user);
+        return Ok($"{user.FullName} added with role: {user.Grade}");
+    }
+
+    [HttpPost("removeUser")]
+    [Authorize(Policy = "admin")]
+    public async Task<IActionResult> RemoveUser([FromBody] User user)
+    {
+        var isRemoved = repository.DeleteBy(user.Email);
+        if (!isRemoved)
+            return NotFound("User not found");
+        return Ok($"{user.FullName} deleted");
+    }
 }

@@ -1,5 +1,8 @@
 using System.Security.Claims;
 using Betonchel.Data;
+using Betonchel.Data.Repositories;
+using Betonchel.Domain.BaseModels;
+using Betonchel.Domain.DBModels;
 using IdentityModel;
 using IdentityServer4.Models;
 using IdentityServer4.Test;
@@ -22,6 +25,7 @@ public class Startup
         services.AddControllers();
         services.AddDbContext<BetonchelContext>(options =>
             options.UseNpgsql(_configuration.GetConnectionString("DefaultConnection")));
+        
         services.AddIdentityServer()
             .AddDeveloperSigningCredential()
             .AddInMemoryApiScopes(new[] { new ApiScope("api1", userClaims: new[] { JwtClaimTypes.Role }),})
@@ -103,5 +107,10 @@ public class Startup
         {
             endpoints.MapControllers();
         });
+    }
+
+    private void AddRepositories(IServiceCollection services)
+    {
+        services.AddScoped<IBaseRepository<ConcreteGrade, int>, ConcreteGradeRepository>();
     }
 }
