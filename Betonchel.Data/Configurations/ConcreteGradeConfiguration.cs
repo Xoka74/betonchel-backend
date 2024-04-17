@@ -11,13 +11,11 @@ internal class ConcreteGradeConfiguration : IEntityTypeConfiguration<ConcreteGra
         builder.HasKey(cg => cg.Id);
 
         builder.Property(cg => cg.Mark)
-            .HasColumnType("varchar")
-            .HasMaxLength(10)
+            .HasColumnType("varchar(10)")
             .IsRequired();
 
         builder.Property(cg => cg.Class)
-            .HasColumnType("varchar")
-            .HasMaxLength(10)
+            .HasColumnType("varchar(10)")
             .IsRequired();
 
         builder.Property(cg => cg.WaterproofTypeId)

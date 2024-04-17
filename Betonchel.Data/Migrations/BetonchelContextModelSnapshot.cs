@@ -47,8 +47,7 @@ namespace Betonchel.Data.Migrations
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar");
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("DeliveryAddress")
                         .HasColumnType("json");
@@ -57,8 +56,7 @@ namespace Betonchel.Data.Migrations
                         .HasColumnType("timestamptz");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(512)
-                        .HasColumnType("varchar");
+                        .HasColumnType("varchar(512)");
 
                     b.Property<int>("Status")
                         .ValueGeneratedOnAdd()
@@ -101,16 +99,14 @@ namespace Betonchel.Data.Migrations
 
                     b.Property<string>("Class")
                         .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("varchar");
+                        .HasColumnType("varchar(10)");
 
                     b.Property<int>("FrostResistanceTypeId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Mark")
                         .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("varchar");
+                        .HasColumnType("varchar(10)");
 
                     b.Property<double>("PricePerCubicMeter")
                         .HasColumnType("double precision");
@@ -167,8 +163,7 @@ namespace Betonchel.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("varchar");
+                        .HasColumnType("varchar(10)");
 
                     b.HasKey("Id");
 
@@ -183,21 +178,26 @@ namespace Betonchel.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ContactData")
+                    b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("json");
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)");
 
                     b.Property<int>("Grade")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("PasswordHash")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar");
+                        .HasColumnType("varchar(70)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+
+                    b.HasCheckConstraint("CK_Email", "\"Email\" LIKE '%@%'");
                 });
 
             modelBuilder.Entity("Betonchel.Domain.Models.WaterproofType", b =>
@@ -210,8 +210,7 @@ namespace Betonchel.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("varchar");
+                        .HasColumnType("varchar(10)");
 
                     b.HasKey("Id");
 

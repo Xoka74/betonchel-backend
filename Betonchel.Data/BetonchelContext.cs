@@ -25,7 +25,7 @@ public class BetonchelContext : DbContext
         modelBuilder.ApplyConfiguration(new ApplicationConfiguration());
         modelBuilder.ApplyConfiguration(new ConcreteGradeConfiguration());
         modelBuilder.ApplyConfiguration(new ConcretePumpConfiguration());
-        modelBuilder.ApplyConfiguration(new EmployeeConfiguration());
+        modelBuilder.ApplyConfiguration(new UserConfiguration());
         modelBuilder.ApplyConfiguration(new FrostResistanceTypeConfiguration());
         modelBuilder.ApplyConfiguration(new WaterproofTypeConfiguration());
 

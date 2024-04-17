@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Betonchel.Data;
 using IdentityModel;
 using IdentityServer4.Models;
 using IdentityServer4.Test;
@@ -19,7 +20,7 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddControllers();
-        services.AddDbContext<DbContext>(options =>
+        services.AddDbContext<BetonchelContext>(options =>
             options.UseNpgsql(_configuration.GetConnectionString("DefaultConnection")));
         services.AddIdentityServer()
             .AddDeveloperSigningCredential()

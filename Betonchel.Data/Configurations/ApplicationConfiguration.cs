@@ -11,8 +11,7 @@ internal class ApplicationConfiguration : IEntityTypeConfiguration<Application>
         builder.HasKey(a => a.Id);
 
         builder.Property(a => a.CustomerName)
-            .HasMaxLength(50)
-            .HasColumnType("varchar")
+            .HasColumnType("varchar(50)")
             .IsRequired();
 
         builder.Property(a => a.UserId)
@@ -55,8 +54,7 @@ internal class ApplicationConfiguration : IEntityTypeConfiguration<Application>
             .IsRequired();
 
         builder.Property(a => a.Description)
-            .HasColumnType("varchar")
-            .HasMaxLength(512);
+            .HasColumnType("varchar(512)");
 
         builder.HasOne(a => a.User)
             .WithMany(e => e.Application)

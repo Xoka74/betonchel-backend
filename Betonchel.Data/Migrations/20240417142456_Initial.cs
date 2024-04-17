@@ -34,7 +34,7 @@ namespace Betonchel.Data.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "varchar", maxLength: 10, nullable: false)
+                    Name = table.Column<string>(type: "varchar(10)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -47,13 +47,15 @@ namespace Betonchel.Data.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ContactData = table.Column<string>(type: "json", nullable: false),
+                    Email = table.Column<string>(type: "varchar(50)", nullable: false),
+                    FullName = table.Column<string>(type: "varchar(50)", nullable: false),
                     Grade = table.Column<int>(type: "integer", nullable: false),
-                    Name = table.Column<string>(type: "varchar", maxLength: 50, nullable: false)
+                    PasswordHash = table.Column<string>(type: "varchar(70)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                    table.CheckConstraint("CK_Email", "\"Email\" LIKE '%@%'");
                 });
 
             migrationBuilder.CreateTable(
@@ -62,7 +64,7 @@ namespace Betonchel.Data.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "varchar", maxLength: 10, nullable: false)
+                    Name = table.Column<string>(type: "varchar(10)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -75,8 +77,8 @@ namespace Betonchel.Data.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Mark = table.Column<string>(type: "varchar", maxLength: 10, nullable: false),
-                    Class = table.Column<string>(type: "varchar", maxLength: 10, nullable: false),
+                    Mark = table.Column<string>(type: "varchar(10)", nullable: false),
+                    Class = table.Column<string>(type: "varchar(10)", nullable: false),
                     WaterproofTypeId = table.Column<int>(type: "integer", nullable: false),
                     FrostResistanceTypeId = table.Column<int>(type: "integer", nullable: false),
                     PricePerCubicMeter = table.Column<double>(type: "double precision", nullable: false)
@@ -105,7 +107,7 @@ namespace Betonchel.Data.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    CustomerName = table.Column<string>(type: "varchar", maxLength: 50, nullable: false),
+                    CustomerName = table.Column<string>(type: "varchar(50)", nullable: false),
                     UserId = table.Column<int>(type: "integer", nullable: false),
                     ConcreteGradeId = table.Column<int>(type: "integer", nullable: false),
                     TotalPrice = table.Column<double>(type: "numeric", nullable: false),
@@ -115,7 +117,7 @@ namespace Betonchel.Data.Migrations
                     DeliveryAddress = table.Column<string>(type: "json", nullable: true),
                     DeliveryDate = table.Column<DateTime>(type: "timestamptz", nullable: false),
                     ApplicationCreationDate = table.Column<DateTime>(type: "timestamptz", nullable: false, defaultValueSql: "now()"),
-                    Description = table.Column<string>(type: "varchar", maxLength: 512, nullable: true),
+                    Description = table.Column<string>(type: "varchar(512)", nullable: true),
                     Status = table.Column<int>(type: "integer", nullable: false, defaultValue: 0)
                 },
                 constraints: table =>

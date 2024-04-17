@@ -11,8 +11,7 @@ public class WaterproofTypeConfiguration : IEntityTypeConfiguration<WaterproofTy
         builder.HasKey(wt => wt.Id);
 
         builder.Property(wt => wt.Name)
-            .HasColumnType("varchar")
-            .HasMaxLength(10)
+            .HasColumnType("varchar(10)")
             .IsRequired();
     }
 }
