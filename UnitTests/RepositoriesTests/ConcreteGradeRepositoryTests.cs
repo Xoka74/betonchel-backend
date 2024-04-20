@@ -57,4 +57,33 @@ public class ConcreteGradeRepositoryTests
         );
         //     .SaveChanges();
     }
+    [Test]
+    public void UserRepositoryTest()
+    {
+        var repo = new UserRepository(dataContext);
+        foreach (var user in repo.GetAll())
+        {
+            Console.WriteLine(
+                $"{user} {user.FullName} {user.Email}"
+            );
+        }
+        var t1 = repo.GetBy(12);
+        Console.WriteLine(t1);
+        var u = repo.GetBy(3);
+        Console.WriteLine(
+            $"{u} {u.FullName} {u.Email}"
+        );
+        // cg.Mark = "213";
+        // var model = new ConcreteGrade()
+        // {
+        //     Id=1, Mark = "М-100", Class = "В7,5", WaterproofTypeId = 2, FrostResistanceTypeId = 1, PricePerCubicMeter = 12
+        // };
+        // repo.Create(model);
+        // var cg = repo.GetBy(1);
+        // Console.WriteLine(
+        //     $"{cg} {cg.WaterproofType.Name} {cg.FrostResistanceType.Name}"
+        // );
+        //     .SaveChanges();
+    }
+    
 }

@@ -25,32 +25,49 @@ public sealed class ConcreteGradeRepository : IBaseRepository<ConcreteGrade, int
         return GetAll().FirstOrDefault(cg => cg.Id == id);
     }
 
-    public void Create(ConcreteGrade model)
+    public bool Create(ConcreteGrade model)
     {
         dataContext.Add(model);
-        dataContext.SaveChanges();
+        return TrySaveContext();
     }
 
-    public void Update(ConcreteGrade model)
+    public bool Update(ConcreteGrade model)
     {
         var toUpdate = dataContext.ConcreteGrades.FirstOrDefault(cg => cg.Id == model.Id);
 
-        if (toUpdate == null) return;
-        
+        if (toUpdate == null) 
+            return false;
+
         toUpdate.Mark = model.Mark;
         toUpdate.Class = model.Class;
         toUpdate.WaterproofTypeId = model.WaterproofTypeId;
         toUpdate.FrostResistanceTypeId = model.FrostResistanceTypeId;
         toUpdate.PricePerCubicMeter = model.PricePerCubicMeter;
         dataContext.Update(toUpdate);
-        dataContext.SaveChanges();
+        return TrySaveContext();
     }
 
-    public void DeleteBy(int id)
+    public bool DeleteBy(int id)
     {
         var concreteGrade = dataContext.ConcreteGrades.Find(id);
-        if (concreteGrade is not null)
-            dataContext.ConcreteGrades.Remove(concreteGrade);
-        dataContext.SaveChanges();
+        
+        if (concreteGrade is null) 
+            return false;
+        
+        dataContext.ConcreteGrades.Remove(concreteGrade);
+        return TrySaveContext();
+    }
+
+    private bool TrySaveContext()
+    {
+        try
+        {
+            dataContext.SaveChanges();
+            return true;
+        }
+        catch (DbUpdateException)
+        {
+            return false;
+        }
     }
 }
