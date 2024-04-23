@@ -80,7 +80,7 @@ namespace Betonchel.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Applications");
+                    b.ToTable("Applications", (string)null);
 
                     b.HasCheckConstraint("CK_DeliveryDate", "\"DeliveryDate\" > now()");
 
@@ -120,7 +120,7 @@ namespace Betonchel.Data.Migrations
 
                     b.HasIndex("WaterproofTypeId");
 
-                    b.ToTable("ConcreteGrades");
+                    b.ToTable("ConcreteGrades", (string)null);
 
                     b.HasCheckConstraint("CK_PricePerCubicMeter", "\"PricePerCubicMeter\" >= 0");
                 });
@@ -144,7 +144,7 @@ namespace Betonchel.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ConcretePumps");
+                    b.ToTable("ConcretePumps", (string)null);
 
                     b.HasCheckConstraint("CK_MaximumCapacity", "\"MaximumCapacity\" >= 0");
 
@@ -167,7 +167,7 @@ namespace Betonchel.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("FrostResistanceTypes");
+                    b.ToTable("FrostResistanceTypes", (string)null);
                 });
 
             modelBuilder.Entity("Betonchel.Domain.DBModels.User", b =>
@@ -198,7 +198,7 @@ namespace Betonchel.Data.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
 
                     b.HasCheckConstraint("CK_Email", "\"Email\" LIKE '%@%'");
                 });
@@ -217,7 +217,7 @@ namespace Betonchel.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("WaterproofTypes");
+                    b.ToTable("WaterproofTypes", (string)null);
                 });
 
             modelBuilder.Entity("Betonchel.Domain.DBModels.Application", b =>

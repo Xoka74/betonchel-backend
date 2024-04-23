@@ -68,7 +68,7 @@ public class AuthController : ControllerBase
             new KeyValuePair<string, string>("client_id", "AnyClientId"),
             new KeyValuePair<string, string>("client_secret", "S3cr3t"),
             new KeyValuePair<string, string>("grant_type", "password"),
-            new KeyValuePair<string, string>("username", model.Username),
+            new KeyValuePair<string, string>("username", model.Email),
             new KeyValuePair<string, string>("password", model.Password),
         });
 

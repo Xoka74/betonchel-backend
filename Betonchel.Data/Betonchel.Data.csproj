@@ -7,12 +7,17 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.23" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.28" />
       <PackageReference Include="Npgsql" Version="6.0.10" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Betonchel.Domain\Betonchel.Domain.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="UserConfigurations" />
     </ItemGroup>
 
 </Project>
