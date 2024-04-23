@@ -1,4 +1,4 @@
-﻿using Betonchel.Domain.Models;
+﻿using Betonchel.Domain.DBModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,13 +11,11 @@ internal class ConcreteGradeConfiguration : IEntityTypeConfiguration<ConcreteGra
         builder.HasKey(cg => cg.Id);
 
         builder.Property(cg => cg.Mark)
-            .HasColumnType("varchar")
-            .HasMaxLength(10)
+            .HasColumnType("varchar(10)")
             .IsRequired();
 
         builder.Property(cg => cg.Class)
-            .HasColumnType("varchar")
-            .HasMaxLength(10)
+            .HasColumnType("varchar(10)")
             .IsRequired();
 
         builder.Property(cg => cg.WaterproofTypeId)
@@ -29,7 +27,7 @@ internal class ConcreteGradeConfiguration : IEntityTypeConfiguration<ConcreteGra
         builder.Property(cg => cg.PricePerCubicMeter)
             .IsRequired();
 
-        builder.HasCheckConstraint("PricePerCubicMeter", "PricePerCubicMeter >= 0");
+        builder.HasCheckConstraint("CK_PricePerCubicMeter", "\"PricePerCubicMeter\" >= 0");
         
         builder.HasMany(cg => cg.Applications)
             .WithOne(a => a.ConcreteGrade)

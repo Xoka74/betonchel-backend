@@ -1,4 +1,4 @@
-﻿using Betonchel.Domain.Models;
+﻿using Betonchel.Domain.DBModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,11 +11,10 @@ internal class ApplicationConfiguration : IEntityTypeConfiguration<Application>
         builder.HasKey(a => a.Id);
 
         builder.Property(a => a.CustomerName)
-            .HasMaxLength(50)
-            .HasColumnType("varchar")
+            .HasColumnType("varchar(50)")
             .IsRequired();
 
-        builder.Property(a => a.EmployeeId)
+        builder.Property(a => a.UserId)
             .IsRequired();
 
         builder.Property(a => a.ConcreteGradeId)
@@ -24,7 +23,7 @@ internal class ApplicationConfiguration : IEntityTypeConfiguration<Application>
         builder.Property(a => a.TotalPrice)
             .HasColumnType("numeric")
             .IsRequired();
-        builder.HasCheckConstraint("TotalPrice", "TotalPrice >= 0");
+        builder.HasCheckConstraint("CK_TotalPrice", "\"TotalPrice\" >= 0");
 
         builder.Property(a => a.ConcretePumpId)
             .IsRequired();
@@ -35,7 +34,7 @@ internal class ApplicationConfiguration : IEntityTypeConfiguration<Application>
 
         builder.Property(a => a.Volume)
             .IsRequired();
-        builder.HasCheckConstraint("Volume", "Volume >= 0");
+        builder.HasCheckConstraint("CK_Volume", "\"Volume\" >= 0");
 
         builder.Property(a => a.DeliveryAddress)
             .HasColumnType("json");
@@ -43,7 +42,11 @@ internal class ApplicationConfiguration : IEntityTypeConfiguration<Application>
         builder.Property(a => a.DeliveryDate)
             .HasColumnType("timestamptz")
             .IsRequired();
-        builder.HasCheckConstraint("DeliveryDate", "DeliveryDate > now()");
+        builder.HasCheckConstraint("CK_DeliveryDate", "\"DeliveryDate\" > now()");
+
+        builder.Property(a => a.Status)
+            .HasDefaultValue(ApplicationStatus.Created)
+            .IsRequired();
 
         builder.Property(a => a.ApplicationCreationDate)
             .HasColumnType("timestamptz")
@@ -51,12 +54,11 @@ internal class ApplicationConfiguration : IEntityTypeConfiguration<Application>
             .IsRequired();
 
         builder.Property(a => a.Description)
-            .HasColumnType("varchar")
-            .HasMaxLength(512);
+            .HasColumnType("varchar(512)");
 
         builder.HasOne(a => a.User)
             .WithMany(e => e.Application)
-            .HasForeignKey(a => a.EmployeeId)
+            .HasForeignKey(a => a.UserId)
             .HasPrincipalKey(e => e.Id)
             .OnDelete(DeleteBehavior.Restrict);
     }

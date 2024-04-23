@@ -1,8 +1,9 @@
-﻿namespace Betonchel.Domain.Models;
+﻿using Betonchel.Domain.BaseModels;
 
-public class FrostResistanceType
+namespace Betonchel.Domain.DBModels;
+
+public class FrostResistanceType : Entity<int>
 {
-    public int Id { get; set; }
     public string Name { get; set; }
 
     public ICollection<ConcreteGrade> ConcreteGrades { get; set; }

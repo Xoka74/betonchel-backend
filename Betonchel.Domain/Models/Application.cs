@@ -1,10 +1,11 @@
-﻿namespace Betonchel.Domain.Models;
+﻿using Betonchel.Domain.BaseModels;
 
-public class Application
+namespace Betonchel.Domain.DBModels;
+
+public class Application : Entity<int>
 {
-    public int Id { get; set; }
     public string CustomerName { get; set; }
-    public int EmployeeId { get; set; }
+    public int UserId { get; set; }
     public int ConcreteGradeId { get; set; }
     public double TotalPrice { get; set; }
     public int ConcretePumpId { get; set; }
@@ -14,6 +15,7 @@ public class Application
     public DateTime DeliveryDate { get; set; }
     public DateTime ApplicationCreationDate { get; set; }
     public string? Description { get; set; }
+    public ApplicationStatus Status { get; set; }
 
     public ConcreteGrade ConcreteGrade { get; set; }
     public ConcretePump? ConcretePump { get; set; }

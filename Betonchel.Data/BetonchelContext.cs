@@ -1,6 +1,6 @@
 ﻿using Betonchel.Data.Configurations;
+using Betonchel.Domain.DBModels;
 using Microsoft.EntityFrameworkCore;
-using Betonchel.Domain.Models;
 
 namespace Betonchel.Data;
 
@@ -17,15 +17,18 @@ public class BetonchelContext : DbContext
     {
     }
 
+    // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    //     => optionsBuilder.LogTo(Console.WriteLine);
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new ApplicationConfiguration());
         modelBuilder.ApplyConfiguration(new ConcreteGradeConfiguration());
         modelBuilder.ApplyConfiguration(new ConcretePumpConfiguration());
-        modelBuilder.ApplyConfiguration(new EmployeeConfiguration());
+        modelBuilder.ApplyConfiguration(new UserConfiguration());
         modelBuilder.ApplyConfiguration(new FrostResistanceTypeConfiguration());
         modelBuilder.ApplyConfiguration(new WaterproofTypeConfiguration());
-        
+
         base.OnModelCreating(modelBuilder);
     }
 }

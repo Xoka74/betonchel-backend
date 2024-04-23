@@ -1,4 +1,4 @@
-﻿using Betonchel.Domain.Models;
+﻿using Betonchel.Domain.DBModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,8 +11,7 @@ public class WaterproofTypeConfiguration : IEntityTypeConfiguration<WaterproofTy
         builder.HasKey(wt => wt.Id);
 
         builder.Property(wt => wt.Name)
-            .HasColumnType("varchar")
-            .HasMaxLength(10)
+            .HasColumnType("varchar(10)")
             .IsRequired();
     }
 }

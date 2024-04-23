@@ -1,4 +1,4 @@
-﻿namespace Betonchel.Domain.Models;
+﻿namespace Betonchel.Domain.DBModels;
 
 public enum UserGrade
 {

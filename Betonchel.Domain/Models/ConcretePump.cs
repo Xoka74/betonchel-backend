@@ -1,11 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Betonchel.Domain.BaseModels;
 
-namespace Betonchel.Domain.Models;
+namespace Betonchel.Domain.DBModels;
 
-public class ConcretePump
+public class ConcretePump : Entity<int>
 {
-    public int Id { get; set; }
     public float MaximumCapacity { get; set; }
     public float? PipeLength { get; set; }
     public double PricePerHour { get; set; }
