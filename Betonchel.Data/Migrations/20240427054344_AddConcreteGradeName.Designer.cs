@@ -3,6 +3,7 @@ using System;
 using Betonchel.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,13 +12,14 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Betonchel.Data.Migrations
 {
     [DbContext(typeof(BetonchelContext))]
-    partial class BetonchelContextModelSnapshot : ModelSnapshot
+    [Migration("20240427054344_AddConcreteGradeName")]
+    partial class AddConcreteGradeName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.28")
+                .HasAnnotation("ProductVersion", "6.0.29")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -80,7 +82,7 @@ namespace Betonchel.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Applications", (string)null);
+                    b.ToTable("Applications");
 
                     b.HasCheckConstraint("CK_DeliveryDate", "\"DeliveryDate\" > now()");
 
@@ -108,6 +110,9 @@ namespace Betonchel.Data.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(10)");
 
+                    b.Property<int>("Name")
+                        .HasColumnType("integer");
+
                     b.Property<double>("PricePerCubicMeter")
                         .HasColumnType("double precision");
 
@@ -120,7 +125,10 @@ namespace Betonchel.Data.Migrations
 
                     b.HasIndex("WaterproofTypeId");
 
-                    b.ToTable("ConcreteGrades", (string)null);
+                    b.HasIndex("Mark", "Class")
+                        .IsUnique();
+
+                    b.ToTable("ConcreteGrades");
 
                     b.HasCheckConstraint("CK_PricePerCubicMeter", "\"PricePerCubicMeter\" >= 0");
                 });
@@ -144,7 +152,7 @@ namespace Betonchel.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ConcretePumps", (string)null);
+                    b.ToTable("ConcretePumps");
 
                     b.HasCheckConstraint("CK_MaximumCapacity", "\"MaximumCapacity\" >= 0");
 
@@ -167,7 +175,7 @@ namespace Betonchel.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("FrostResistanceTypes", (string)null);
+                    b.ToTable("FrostResistanceTypes");
                 });
 
             modelBuilder.Entity("Betonchel.Domain.DBModels.User", b =>
@@ -198,7 +206,7 @@ namespace Betonchel.Data.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
 
                     b.HasCheckConstraint("CK_Email", "\"Email\" LIKE '%@%'");
                 });
@@ -217,7 +225,7 @@ namespace Betonchel.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("WaterproofTypes", (string)null);
+                    b.ToTable("WaterproofTypes");
                 });
 
             modelBuilder.Entity("Betonchel.Domain.DBModels.Application", b =>

@@ -10,6 +10,9 @@ internal class ConcreteGradeConfiguration : IEntityTypeConfiguration<ConcreteGra
     {
         builder.HasKey(cg => cg.Id);
 
+        builder.Property(cg => cg.Name)
+            .IsRequired();
+
         builder.Property(cg => cg.Mark)
             .HasColumnType("varchar(10)")
             .IsRequired();
@@ -17,6 +20,8 @@ internal class ConcreteGradeConfiguration : IEntityTypeConfiguration<ConcreteGra
         builder.Property(cg => cg.Class)
             .HasColumnType("varchar(10)")
             .IsRequired();
+
+        builder.HasIndex(cg => new { cg.Mark, cg.Class }).IsUnique();
 
         builder.Property(cg => cg.WaterproofTypeId)
             .IsRequired();
@@ -28,7 +33,7 @@ internal class ConcreteGradeConfiguration : IEntityTypeConfiguration<ConcreteGra
             .IsRequired();
 
         builder.HasCheckConstraint("CK_PricePerCubicMeter", "\"PricePerCubicMeter\" >= 0");
-        
+
         builder.HasMany(cg => cg.Applications)
             .WithOne(a => a.ConcreteGrade)
             .HasForeignKey(a => a.ConcreteGradeId)
@@ -40,7 +45,7 @@ internal class ConcreteGradeConfiguration : IEntityTypeConfiguration<ConcreteGra
             .HasForeignKey(cg => cg.WaterproofTypeId)
             .HasPrincipalKey(wt => wt.Id)
             .OnDelete(DeleteBehavior.Restrict);
-        
+
         builder.HasOne(cg => cg.FrostResistanceType)
             .WithMany(frt => frt.ConcreteGrades)
             .HasForeignKey(cg => cg.FrostResistanceTypeId)
