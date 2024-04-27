@@ -4,6 +4,7 @@ namespace Betonchel.Domain.DBModels;
 
 public class ConcreteGrade : Entity<int>
 {
+    public ConcreteGradeAttribute Name { get; set; }
     public string Mark { get; set; }
     public string Class { get; set; }
     public int WaterproofTypeId { get; set; }
