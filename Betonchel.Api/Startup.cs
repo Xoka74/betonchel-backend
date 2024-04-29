@@ -22,6 +22,11 @@ public class Startup
 
         AddRepositories(services);
 
+        services.AddHttpClient(
+            "UserCheck",
+            client => client.BaseAddress = new Uri(configuration["AuthenticationServer:BaseUrl"])
+        );
+
         services.AddControllers();
     }
 
@@ -34,16 +39,16 @@ public class Startup
 
         app.UseRouting();
 
-        app.UseAuthorization();
-
         app.UseEndpoints(endpoints => endpoints.MapControllers());
     }
 
     private static void AddRepositories(IServiceCollection services)
     {
-        services.AddScoped<IBaseRepository<ConcreteGrade, int>, ConcreteGradeRepository>();
-        services.AddScoped<IBaseRepository<WaterproofType, int>, WaterproofTypeRepository>();
-        services.AddScoped<IBaseRepository<FrostResistanceType, int>, FrostResistanceTypeRepository>();
-        services.AddScoped<IBaseRepository<User, int>, UserRepository>();
+        services.AddScoped<IFilterableRepository<ConcreteGrade, int>, ConcreteGradeRepository>();
+        services.AddScoped<IFilterableRepository<WaterproofType, int>, WaterproofTypeRepository>();
+        services.AddScoped<IFilterableRepository<FrostResistanceType, int>, FrostResistanceTypeRepository>();
+        services.AddScoped<IFilterableRepository<User, int>, UserRepository>();
+        services.AddScoped<IBaseRepository<ConcretePump, int>, ConcretePumpRepository>();
+        services.AddScoped<IFilterableRepository<Application, int>, ApplicationRepository>();
     }
 }

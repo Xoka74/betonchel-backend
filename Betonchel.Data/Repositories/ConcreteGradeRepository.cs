@@ -1,19 +1,23 @@
-﻿using Betonchel.Domain.BaseModels;
+﻿using System.Data;
+using Betonchel.Data.Extensions;
+using Betonchel.Domain.BaseModels;
 using Betonchel.Domain.DBModels;
+using Betonchel.Domain.Filters;
+using Betonchel.Domain.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Betonchel.Data.Repositories;
 
-public class ConcreteGradeRepository : IBaseRepository<ConcreteGrade, int>
+public class ConcreteGradeRepository : IFilterableRepository<ConcreteGrade, int>
 {
     private readonly BetonchelContext dataContext;
-    private readonly IBaseRepository<WaterproofType, int> waterproofTypeRepository;
-    private readonly IBaseRepository<FrostResistanceType, int> frostResistanceTypeRepository;
+    private readonly IFilterableRepository<WaterproofType, int> waterproofTypeRepository;
+    private readonly IFilterableRepository<FrostResistanceType, int> frostResistanceTypeRepository;
 
     public ConcreteGradeRepository(
         BetonchelContext dataContext,
-        IBaseRepository<WaterproofType, int> waterproofTypeRepository,
-        IBaseRepository<FrostResistanceType, int> frostResistanceTypeRepository
+        IFilterableRepository<WaterproofType, int> waterproofTypeRepository,
+        IFilterableRepository<FrostResistanceType, int> frostResistanceTypeRepository
     )
     {
         this.dataContext = dataContext;
@@ -28,71 +32,80 @@ public class ConcreteGradeRepository : IBaseRepository<ConcreteGrade, int>
             .Include(cg => cg.FrostResistanceType);
     }
 
-    public ConcreteGrade? GetBy(int id)
-    {
-        return GetAll().FirstOrDefault(cg => cg.Id == id);
-    }
+    public ConcreteGrade? GetBy(int id) => GetAll().SingleOrDefault(cg => cg.Id == id);
 
-    public bool Create(ConcreteGrade model)
+    public RepositoryOperationStatus Create(ConcreteGrade model)
     {
-        var waterproofType = waterproofTypeRepository.GetAll()
-            .FirstOrDefault(wpt => wpt.Name == model.WaterproofType.Name);
+        using var transaction = dataContext.Database.BeginTransaction(IsolationLevel.RepeatableRead);
+
+        var waterproofType = waterproofTypeRepository
+            .GetFiltered(new WaterproofTypeNameFilter(model.WaterproofType.Name))
+            .FirstOrDefault();
+
         if (waterproofType is not null)
             model.WaterproofType = waterproofType;
 
-        var frostResistanceType = frostResistanceTypeRepository.GetAll()
-            .FirstOrDefault(frt => frt.Name == model.FrostResistanceType.Name);
+        var frostResistanceType = frostResistanceTypeRepository
+            .GetFiltered(new FrostResistanceTypeNameFilter(model.FrostResistanceType.Name))
+            .FirstOrDefault();
+
         if (frostResistanceType is not null)
             model.FrostResistanceType = frostResistanceType;
 
-        dataContext.Add(model);
-        return TrySaveContext();
+        var transactionStatus = dataContext.TrySaveEntity(model)
+            ? RepositoryOperationStatus.Success
+            : RepositoryOperationStatus.UnexpectedError;
+        transaction.CompleteWithStatus(transactionStatus);
+        return transactionStatus;
     }
 
-    public bool Update(ConcreteGrade model)
+    public RepositoryOperationStatus Update(ConcreteGrade model)
     {
-        var toUpdate = dataContext.ConcreteGrades.FirstOrDefault(cg => cg.Id == model.Id);
+        var toUpdate = GetBy(model.Id);
 
-        if (toUpdate == null) return false;
+        if (toUpdate == null) return RepositoryOperationStatus.NonExistentEntity;
+        
+        using var transaction = dataContext.Database.BeginTransaction(IsolationLevel.RepeatableRead);
 
         var waterproofType = waterproofTypeRepository.GetAll()
             .FirstOrDefault(wpt => wpt.Name == model.WaterproofType.Name);
-        if (waterproofType is null) return false;
+        if (waterproofType is null)
+            return RepositoryOperationStatus.ForeignKeyViolation;
 
         var frostResistanceType = frostResistanceTypeRepository.GetAll()
             .FirstOrDefault(frt => frt.Name == model.FrostResistanceType.Name);
-        if (frostResistanceType is null) return false;
+        if (frostResistanceType is null)
+            return RepositoryOperationStatus.ForeignKeyViolation;
 
         toUpdate.Mark = model.Mark;
         toUpdate.Class = model.Class;
         toUpdate.WaterproofTypeId = waterproofType.Id;
         toUpdate.FrostResistanceTypeId = frostResistanceType.Id;
         toUpdate.PricePerCubicMeter = model.PricePerCubicMeter;
-        dataContext.Update(toUpdate);
-        return TrySaveContext();
+
+        var transactionStatus = dataContext.TrySaveContext()
+            ? RepositoryOperationStatus.Success
+            : RepositoryOperationStatus.UnexpectedError;
+        transaction.CompleteWithStatus(transactionStatus);
+        return transactionStatus;
     }
 
-    public bool DeleteBy(int id)
+    public RepositoryOperationStatus DeleteBy(int id)
     {
         var concreteGrade = dataContext.ConcreteGrades.Find(id);
 
         if (concreteGrade is null)
-            return false;
+            return RepositoryOperationStatus.NonExistentEntity;
+        
+        using var transaction = dataContext.Database.BeginTransaction(IsolationLevel.RepeatableRead);
 
         dataContext.ConcreteGrades.Remove(concreteGrade);
-        return TrySaveContext();
+        var transactionStatus = dataContext.TrySaveContext()
+            ? RepositoryOperationStatus.Success
+            : RepositoryOperationStatus.HasReferences;
+        transaction.CompleteWithStatus(transactionStatus);
+        return transactionStatus;
     }
 
-    private bool TrySaveContext()
-    {
-        try
-        {
-            dataContext.SaveChanges();
-            return true;
-        }
-        catch (DbUpdateException)
-        {
-            return false;
-        }
-    }
+    public IQueryable<ConcreteGrade> GetFiltered(Specification<ConcreteGrade> filter) => GetAll().Where(filter);
 }

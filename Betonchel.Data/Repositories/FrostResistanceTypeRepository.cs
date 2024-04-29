@@ -1,10 +1,14 @@
-﻿using Betonchel.Domain.BaseModels;
+﻿using System.Data;
+using Betonchel.Data.Extensions;
+using Betonchel.Domain.BaseModels;
 using Betonchel.Domain.DBModels;
+using Betonchel.Domain.Filters;
+using Betonchel.Domain.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Betonchel.Data.Repositories;
 
-public class FrostResistanceTypeRepository : IBaseRepository<FrostResistanceType, int>
+public class FrostResistanceTypeRepository : IFilterableRepository<FrostResistanceType, int>
 {
     private readonly BetonchelContext dataContext;
 
@@ -15,47 +19,55 @@ public class FrostResistanceTypeRepository : IBaseRepository<FrostResistanceType
 
     public IQueryable<FrostResistanceType> GetAll() => dataContext.FrostResistanceTypes;
 
-    public FrostResistanceType? GetBy(int id) => GetAll().FirstOrDefault(frt => frt.Id == id);
+    public FrostResistanceType? GetBy(int id) => GetAll().SingleOrDefault(wpt => wpt.Id == id);
 
-    public bool Create(FrostResistanceType model)
+    public RepositoryOperationStatus Create(FrostResistanceType model)
     {
-        dataContext.Add(model);
-        return TrySaveContext();
+        if (!HasFrostResistanceTypeUniqueName(model))
+            return RepositoryOperationStatus.UniquenessValueViolation;
+        
+        return dataContext.TrySaveEntity(model)
+            ? RepositoryOperationStatus.Success
+            : RepositoryOperationStatus.UnexpectedError; 
     }
 
-    public bool Update(FrostResistanceType model)
+    public RepositoryOperationStatus Update(FrostResistanceType model)
     {
-        var toUpdate = dataContext.FrostResistanceTypes
-            .FirstOrDefault(frt => frt.Id == model.Id);
+        var toUpdate = GetBy(model.Id);
 
         if (toUpdate is null)
-            return false;
+            return RepositoryOperationStatus.NonExistentEntity;
+
+        if (!HasFrostResistanceTypeUniqueName(model))
+            return RepositoryOperationStatus.UniquenessValueViolation;
 
         toUpdate.Name = model.Name;
-        return TrySaveContext();
+
+        return dataContext.TrySaveContext()
+            ? RepositoryOperationStatus.Success
+            : RepositoryOperationStatus.UnexpectedError;
     }
 
-    public bool DeleteBy(int id)
+    public RepositoryOperationStatus DeleteBy(int id)
     {
-        var frostResistanceType = dataContext.FrostResistanceTypes.Find(id);
+        var waterproofType = dataContext.WaterproofTypes.Find(id);
 
-        if (frostResistanceType is null)
-            return false;
+        if (waterproofType is null)
+            return RepositoryOperationStatus.NonExistentEntity;
+     
+        using var transaction = dataContext.Database.BeginTransaction(IsolationLevel.RepeatableRead);
 
-        dataContext.FrostResistanceTypes.Remove(frostResistanceType);
-        return TrySaveContext();
+        dataContext.WaterproofTypes.Remove(waterproofType);
+        var transactionStatus = dataContext.TrySaveContext()
+            ? RepositoryOperationStatus.Success
+            : RepositoryOperationStatus.HasReferences;
+        transaction.CompleteWithStatus(transactionStatus);
+        return transactionStatus;
     }
 
-    private bool TrySaveContext()
-    {
-        try
-        {
-            dataContext.SaveChanges();
-            return true;
-        }
-        catch (DbUpdateException e)
-        {
-            return false;
-        }
-    }
+    private bool HasFrostResistanceTypeUniqueName(FrostResistanceType model) =>
+        !GetFiltered(new FrostResistanceTypeNameFilter(model.Name)).Any();
+
+    public IQueryable<FrostResistanceType> GetFiltered(Specification<FrostResistanceType> filter) =>
+        GetAll().Where(filter);
 }

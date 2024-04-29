@@ -1,10 +1,14 @@
-﻿using Betonchel.Domain.BaseModels;
+﻿using System.Data;
+using Betonchel.Data.Extensions;
+using Betonchel.Domain.BaseModels;
 using Betonchel.Domain.DBModels;
+using Betonchel.Domain.Filters;
+using Betonchel.Domain.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Betonchel.Data.Repositories;
 
-public class WaterproofTypeRepository : IBaseRepository<WaterproofType, int>
+public class WaterproofTypeRepository : IFilterableRepository<WaterproofType, int>
 {
     private readonly BetonchelContext dataContext;
 
@@ -15,46 +19,55 @@ public class WaterproofTypeRepository : IBaseRepository<WaterproofType, int>
 
     public IQueryable<WaterproofType> GetAll() => dataContext.WaterproofTypes;
 
-    public WaterproofType? GetBy(int id) => GetAll().FirstOrDefault(wpt => wpt.Id == id);
+    public WaterproofType? GetBy(int id) => GetAll().SingleOrDefault(wpt => wpt.Id == id);
 
-    public bool Create(WaterproofType model)
+    public RepositoryOperationStatus Create(WaterproofType model)
     {
-        dataContext.Add(model);
-        return TrySaveContext();
+        if (!HasWaterproofTypeUniqueName(model)) 
+            return RepositoryOperationStatus.UniquenessValueViolation;
+
+        return dataContext.TrySaveEntity(model)
+            ? RepositoryOperationStatus.Success
+            : RepositoryOperationStatus.UnexpectedError; 
     }
 
-    public bool Update(WaterproofType model)
+    public RepositoryOperationStatus Update(WaterproofType model)
     {
-        var toUpdate = dataContext.WaterproofTypes.FirstOrDefault(wpt => wpt.Id == model.Id);
+        var toUpdate = GetBy(model.Id);
 
         if (toUpdate is null)
-            return false;
+            return RepositoryOperationStatus.NonExistentEntity;
+
+        if (!HasWaterproofTypeUniqueName(model))
+            return RepositoryOperationStatus.UniquenessValueViolation;
 
         toUpdate.Name = model.Name;
-        return TrySaveContext();
+
+        return dataContext.TrySaveContext()
+            ? RepositoryOperationStatus.Success
+            : RepositoryOperationStatus.UnexpectedError;
     }
 
-    public bool DeleteBy(int id)
+    public RepositoryOperationStatus DeleteBy(int id)
     {
         var waterproofType = dataContext.WaterproofTypes.Find(id);
 
         if (waterproofType is null)
-            return false;
+            return RepositoryOperationStatus.NonExistentEntity;
 
+        using var transaction = dataContext.Database.BeginTransaction(IsolationLevel.RepeatableRead);
+        
         dataContext.WaterproofTypes.Remove(waterproofType);
-        return TrySaveContext();
+        var transactionStatus = dataContext.TrySaveContext()
+            ? RepositoryOperationStatus.Success
+            : RepositoryOperationStatus.HasReferences;
+        transaction.CompleteWithStatus(transactionStatus);
+        return transactionStatus;
     }
 
-    private bool TrySaveContext()
-    {
-        try
-        {
-            dataContext.SaveChanges();
-            return true;
-        }
-        catch (DbUpdateException e)
-        {
-            return false;
-        }
-    }
+    private bool HasWaterproofTypeUniqueName(WaterproofType model) =>
+        !GetFiltered(new WaterproofTypeNameFilter(model.Name)).Any();
+
+    public IQueryable<WaterproofType> GetFiltered(Specification<WaterproofType> filter) =>
+        GetAll().Where(filter);
 }

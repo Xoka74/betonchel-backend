@@ -1,5 +1,6 @@
 ﻿using Betonchel.Domain.BaseModels;
 using Betonchel.Domain.DBModels;
+using Betonchel.Domain.Helpers;
 using Betonchel.Domain.JsonModels;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,11 +10,19 @@ namespace Betonchel.Api.Controllers;
 [ApiController]
 public class ConcreteGradeController : ControllerBase
 {
-    private readonly IBaseRepository<ConcreteGrade, int> repository;
+    private readonly IFilterableRepository<ConcreteGrade, int> repository;
 
-    public ConcreteGradeController(IBaseRepository<ConcreteGrade, int> repository)
+    public ConcreteGradeController(IFilterableRepository<ConcreteGrade, int> repository)
     {
         this.repository = repository;
+    }
+
+    [HttpGet]
+    [Route("get")]
+    public async Task<IActionResult> Get([FromQuery] int id)
+    {
+        var concreteGrade = repository.GetBy(id);
+        return concreteGrade is null ? NotFound() : Ok(concreteGrade);
     }
 
     [HttpPost]
@@ -22,34 +31,37 @@ public class ConcreteGradeController : ControllerBase
     {
         if (!ModelState.IsValid) return BadRequest(ModelState.ValidationState);
 
-        return repository.Create(userConcreteGrade.ToConcreteGrade())
-            ? Ok()
-            : StatusCode(500, "The database was unable to save the entity");
+        return repository.Create(userConcreteGrade.ToConcreteGrade()) switch
+        {
+            RepositoryOperationStatus.Success => Ok(),
+            _ => StatusCode(500, "The database was unable to save the entity")
+        };
     }
 
-    [HttpPost]
-    [Route("get/{id:int}")]
-    public async Task<IActionResult> Get(int id)
+    [HttpPut]
+    [Route("edit")]
+    public async Task<IActionResult> Edit([FromQuery] int id, [FromBody] UserConcreteGrade userConcreteGrade)
     {
-        var concreteGrade = repository.GetBy(id);
-        return concreteGrade is null ? NotFound() : Ok(concreteGrade.Mark);
+        if (!ModelState.IsValid) return BadRequest(ModelState.ValidationState);
+
+        return repository.Update(userConcreteGrade.ToConcreteGrade(id)) switch
+        {
+            RepositoryOperationStatus.ForeignKeyViolation => BadRequest("Foreign keys is incorrect"),
+            RepositoryOperationStatus.NonExistentEntity => NotFound(),
+            RepositoryOperationStatus.Success => Ok(),
+            _ => StatusCode(500, "The database was unable to save the entity")
+        };
     }
 
-    [HttpPost]  
-    [Route("edit/{id:int}")]
-    public async Task<IActionResult> Edit(int id, [FromBody] UserConcreteGrade userConcreteGrade)
+    [HttpDelete]
+    [Route("delete")]
+    public async Task<IActionResult> Delete([FromQuery] int id)
     {
-        return repository.Update(userConcreteGrade.ToConcreteGrade(id))
-            ? Ok()
-            : NotFound();
-    }
-
-    [HttpPost]
-    [Route("delete/{id:int}")]
-    public async Task<IActionResult> Delete(int id)
-    {
-        return repository.DeleteBy(id)
-            ? Ok()
-            : NotFound();
+        return repository.DeleteBy(id) switch
+        {
+            RepositoryOperationStatus.NonExistentEntity => NotFound(),
+            RepositoryOperationStatus.Success => Ok(),
+            _ => StatusCode(500, "The database was unable to save the entity")
+        };
     }
 }
