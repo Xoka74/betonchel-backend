@@ -8,7 +8,7 @@ public class Application : Entity<int>
     public int UserId { get; set; }
     public int ConcreteGradeId { get; set; }
     public double TotalPrice { get; set; }
-    public int ConcretePumpId { get; set; }
+    public int? ConcretePumpId { get; set; }
     public string ContactData { get; set; }
     public float Volume { get; set; }
     public string? DeliveryAddress { get; set; }

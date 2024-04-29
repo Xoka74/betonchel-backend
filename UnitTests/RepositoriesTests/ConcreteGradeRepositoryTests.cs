@@ -1,6 +1,6 @@
 using Betonchel.Data;
 using Betonchel.Data.Repositories;
-using Betonchel.Domain.DBModels;
+using Betonchel.Domain.Filters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -56,5 +56,17 @@ public class ConcreteGradeRepositoryTests
         //     $"{cg} {cg.WaterproofType.Name} {cg.FrostResistanceType.Name}"
         // );
         //     .SaveChanges();
+    }
+
+    [TestCase]
+    public void Test3()
+    {
+        var repo = new WaterproofTypeRepository(dataContext);
+        var filter = new WaterproofTypeNameFilter("w1");
+        var cgs = repo.GetFiltered(filter);
+        foreach (var cg in cgs)
+        {
+            Console.Write(cg);
+        }
     }
 }

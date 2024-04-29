@@ -25,9 +25,6 @@ internal class ApplicationConfiguration : IEntityTypeConfiguration<Application>
             .IsRequired();
         builder.HasCheckConstraint("CK_TotalPrice", "\"TotalPrice\" >= 0");
 
-        builder.Property(a => a.ConcretePumpId)
-            .IsRequired();
-
         builder.Property(a => a.ContactData)
             .HasColumnType("json")
             .IsRequired();
@@ -40,7 +37,7 @@ internal class ApplicationConfiguration : IEntityTypeConfiguration<Application>
             .HasColumnType("json");
 
         builder.Property(a => a.DeliveryDate)
-            .HasColumnType("timestamptz")
+            .HasColumnType("timestamp")
             .IsRequired();
         builder.HasCheckConstraint("CK_DeliveryDate", "\"DeliveryDate\" > now()");
 
@@ -49,7 +46,7 @@ internal class ApplicationConfiguration : IEntityTypeConfiguration<Application>
             .IsRequired();
 
         builder.Property(a => a.ApplicationCreationDate)
-            .HasColumnType("timestamptz")
+            .HasColumnType("timestamp")
             .HasDefaultValueSql("now()")
             .IsRequired();
 

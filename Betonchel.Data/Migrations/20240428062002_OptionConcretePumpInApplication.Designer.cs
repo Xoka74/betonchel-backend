@@ -3,6 +3,7 @@ using System;
 using Betonchel.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Betonchel.Data.Migrations
 {
     [DbContext(typeof(BetonchelContext))]
-    partial class BetonchelContextModelSnapshot : ModelSnapshot
+    [Migration("20240428062002_OptionConcretePumpInApplication")]
+    partial class OptionConcretePumpInApplication
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,13 +34,13 @@ namespace Betonchel.Data.Migrations
 
                     b.Property<DateTime>("ApplicationCreationDate")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp")
+                        .HasColumnType("timestamptz")
                         .HasDefaultValueSql("now()");
 
                     b.Property<int>("ConcreteGradeId")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("ConcretePumpId")
+                    b.Property<int>("ConcretePumpId")
                         .HasColumnType("integer");
 
                     b.Property<string>("ContactData")
@@ -53,7 +55,7 @@ namespace Betonchel.Data.Migrations
                         .HasColumnType("json");
 
                     b.Property<DateTime>("DeliveryDate")
-                        .HasColumnType("timestamp");
+                        .HasColumnType("timestamptz");
 
                     b.Property<string>("Description")
                         .HasColumnType("varchar(512)");
@@ -237,7 +239,8 @@ namespace Betonchel.Data.Migrations
                     b.HasOne("Betonchel.Domain.DBModels.ConcretePump", "ConcretePump")
                         .WithMany("Applications")
                         .HasForeignKey("ConcretePumpId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("Betonchel.Domain.DBModels.User", "User")
                         .WithMany("Application")

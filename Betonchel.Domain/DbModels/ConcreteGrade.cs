@@ -1,4 +1,5 @@
-﻿using Betonchel.Domain.BaseModels;
+﻿using System.Text.Json.Serialization;
+using Betonchel.Domain.BaseModels;
 
 namespace Betonchel.Domain.DBModels;
 
@@ -11,6 +12,7 @@ public class ConcreteGrade : Entity<int>
     public int FrostResistanceTypeId { get; set; }
     public double PricePerCubicMeter { get; set; }
 
+    [JsonIgnore]
     public ICollection<Application> Applications { get; set; }
     public WaterproofType WaterproofType { get; set; }
     public FrostResistanceType FrostResistanceType { get; set; }
