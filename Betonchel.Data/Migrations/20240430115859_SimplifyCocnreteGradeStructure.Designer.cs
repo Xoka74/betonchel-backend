@@ -3,6 +3,7 @@ using System;
 using Betonchel.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,13 +12,14 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Betonchel.Data.Migrations
 {
     [DbContext(typeof(BetonchelContext))]
-    partial class BetonchelContextModelSnapshot : ModelSnapshot
+    [Migration("20240430115859_SimplifyCocnreteGradeStructure")]
+    partial class SimplifyCocnreteGradeStructure
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.28")
+                .HasAnnotation("ProductVersion", "6.0.29")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -32,13 +34,13 @@ namespace Betonchel.Data.Migrations
 
                     b.Property<DateTime>("ApplicationCreationDate")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamptz")
+                        .HasColumnType("timestamp")
                         .HasDefaultValueSql("now()");
 
                     b.Property<int>("ConcreteGradeId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("ConcretePumpId")
+                    b.Property<int?>("ConcretePumpId")
                         .HasColumnType("integer");
 
                     b.Property<string>("ContactData")
@@ -53,7 +55,7 @@ namespace Betonchel.Data.Migrations
                         .HasColumnType("json");
 
                     b.Property<DateTime>("DeliveryDate")
-                        .HasColumnType("timestamptz");
+                        .HasColumnType("timestamp");
 
                     b.Property<string>("Description")
                         .HasColumnType("varchar(512)");
@@ -80,7 +82,7 @@ namespace Betonchel.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Applications", (string)null);
+                    b.ToTable("Applications");
 
                     b.HasCheckConstraint("CK_DeliveryDate", "\"DeliveryDate\" > now()");
 
@@ -101,26 +103,30 @@ namespace Betonchel.Data.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(10)");
 
-                    b.Property<int>("FrostResistanceTypeId")
-                        .HasColumnType("integer");
+                    b.Property<string>("FrostResistanceType")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
 
                     b.Property<string>("Mark")
                         .IsRequired()
                         .HasColumnType("varchar(10)");
 
+                    b.Property<int>("Name")
+                        .HasColumnType("integer");
+
                     b.Property<double>("PricePerCubicMeter")
                         .HasColumnType("double precision");
 
-                    b.Property<int>("WaterproofTypeId")
-                        .HasColumnType("integer");
+                    b.Property<string>("WaterproofType")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FrostResistanceTypeId");
+                    b.HasIndex("Mark", "Class")
+                        .IsUnique();
 
-                    b.HasIndex("WaterproofTypeId");
-
-                    b.ToTable("ConcreteGrades", (string)null);
+                    b.ToTable("ConcreteGrades");
 
                     b.HasCheckConstraint("CK_PricePerCubicMeter", "\"PricePerCubicMeter\" >= 0");
                 });
@@ -144,30 +150,13 @@ namespace Betonchel.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ConcretePumps", (string)null);
+                    b.ToTable("ConcretePumps");
 
                     b.HasCheckConstraint("CK_MaximumCapacity", "\"MaximumCapacity\" >= 0");
 
                     b.HasCheckConstraint("CK_PipeLength", "\"PipeLength\" >= 0");
 
                     b.HasCheckConstraint("CK_PricePerHour", "\"PricePerHour\" >= 0");
-                });
-
-            modelBuilder.Entity("Betonchel.Domain.DBModels.FrostResistanceType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("varchar(10)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("FrostResistanceTypes", (string)null);
                 });
 
             modelBuilder.Entity("Betonchel.Domain.DBModels.User", b =>
@@ -198,26 +187,9 @@ namespace Betonchel.Data.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
 
                     b.HasCheckConstraint("CK_Email", "\"Email\" LIKE '%@%'");
-                });
-
-            modelBuilder.Entity("Betonchel.Domain.DBModels.WaterproofType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("varchar(10)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("WaterproofTypes", (string)null);
                 });
 
             modelBuilder.Entity("Betonchel.Domain.DBModels.Application", b =>
@@ -231,8 +203,7 @@ namespace Betonchel.Data.Migrations
                     b.HasOne("Betonchel.Domain.DBModels.ConcretePump", "ConcretePump")
                         .WithMany("Applications")
                         .HasForeignKey("ConcretePumpId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Betonchel.Domain.DBModels.User", "User")
                         .WithMany("Application")
@@ -249,25 +220,6 @@ namespace Betonchel.Data.Migrations
 
             modelBuilder.Entity("Betonchel.Domain.DBModels.ConcreteGrade", b =>
                 {
-                    b.HasOne("Betonchel.Domain.DBModels.FrostResistanceType", "FrostResistanceType")
-                        .WithMany("ConcreteGrades")
-                        .HasForeignKey("FrostResistanceTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Betonchel.Domain.DBModels.WaterproofType", "WaterproofType")
-                        .WithMany("ConcreteGrades")
-                        .HasForeignKey("WaterproofTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("FrostResistanceType");
-
-                    b.Navigation("WaterproofType");
-                });
-
-            modelBuilder.Entity("Betonchel.Domain.DBModels.ConcreteGrade", b =>
-                {
                     b.Navigation("Applications");
                 });
 
@@ -276,19 +228,9 @@ namespace Betonchel.Data.Migrations
                     b.Navigation("Applications");
                 });
 
-            modelBuilder.Entity("Betonchel.Domain.DBModels.FrostResistanceType", b =>
-                {
-                    b.Navigation("ConcreteGrades");
-                });
-
             modelBuilder.Entity("Betonchel.Domain.DBModels.User", b =>
                 {
                     b.Navigation("Application");
-                });
-
-            modelBuilder.Entity("Betonchel.Domain.DBModels.WaterproofType", b =>
-                {
-                    b.Navigation("ConcreteGrades");
                 });
 #pragma warning restore 612, 618
         }

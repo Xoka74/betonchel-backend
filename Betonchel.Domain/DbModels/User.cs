@@ -1,4 +1,5 @@
-﻿using Betonchel.Domain.BaseModels;
+﻿using System.Text.Json.Serialization;
+using Betonchel.Domain.BaseModels;
 
 namespace Betonchel.Domain.DBModels;
 
@@ -9,5 +10,6 @@ public class User : Entity<int>
     public UserGrade Grade;
     public string PasswordHash;
 
+    [JsonIgnore]
     public ICollection<Application> Application;
 }

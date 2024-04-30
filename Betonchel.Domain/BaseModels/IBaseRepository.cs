@@ -5,7 +5,7 @@ public interface IBaseRepository<TDbModel, in TDbModelPk>
 {
     public IQueryable<TDbModel> GetAll();
     public TDbModel? GetBy(TDbModelPk id);
-    public void Create(TDbModel model);
-    public void Update(TDbModel model);
-    public void DeleteBy(TDbModelPk id);
+    public Task<IRepositoryOperationStatus> Create(TDbModel model);
+    public Task<IRepositoryOperationStatus> Update(TDbModel model);
+    public Task<IRepositoryOperationStatus> DeleteBy(TDbModelPk id);
 }

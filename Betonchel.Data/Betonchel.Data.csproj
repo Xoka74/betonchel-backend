@@ -16,8 +16,4 @@
       <ProjectReference Include="..\Betonchel.Domain\Betonchel.Domain.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="UserConfigurations" />
-    </ItemGroup>
-
 </Project>

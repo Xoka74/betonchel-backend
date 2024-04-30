@@ -1,6 +1,6 @@
 using Betonchel.Data;
 using Betonchel.Data.Repositories;
-using Betonchel.Domain.DBModels;
+using Betonchel.Domain.Filters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -33,7 +33,7 @@ public class ConcreteGradeRepositoryTests
     [Test]
     public void Test1()
     {
-        var repo = new ConcreteGradeRepository(dataContext);
+        // var repo = new ConcreteGradeRepository(dataContext);
         // foreach (var concreteGrade in repo.GetAll())
         // {
         //     Console.WriteLine(
@@ -46,15 +46,31 @@ public class ConcreteGradeRepositoryTests
         //     $"{cg} {cg.WaterproofType.Name} {cg.FrostResistanceType.Name}"
         // );
         // cg.Mark = "213";
-        var model = new ConcreteGrade()
-        {
-            Id=1, Mark = "М-100", Class = "В7,5", WaterproofTypeId = 2, FrostResistanceTypeId = 1, PricePerCubicMeter = 12
-        };
-        repo.Create(model);
-        var cg = repo.GetBy(1);
-        Console.WriteLine(
-            $"{cg} {cg.WaterproofType.Name} {cg.FrostResistanceType.Name}"
-        );
+        // var model = new ConcreteGrade()
+        // {
+        //     Id=1, Mark = "М-100", Class = "В7,5", WaterproofTypeId = 2, FrostResistanceTypeId = 1, PricePerCubicMeter = 12
+        // };
+        // repo.Create(model);
+        // var cg = repo.GetBy(1);
+        // Console.WriteLine(
+        //     $"{cg} {cg.WaterproofType.Name} {cg.FrostResistanceType.Name}"
+        // );
         //     .SaveChanges();
+    }
+
+    [TestCase]
+    public void Test2()
+    {
+    }
+
+    [TestCase]
+    public void Test3()
+    {
+        var appRepo = new ApplicationRepository(dataContext);
+        var filter = new ApplicationDateFilter(DateTime.Parse("28/07/2024"));
+        foreach (var cg in appRepo.GetAll(filter))
+        {
+            Console.WriteLine(cg);
+        }
     }
 }

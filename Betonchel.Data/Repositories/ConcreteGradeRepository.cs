@@ -1,10 +1,14 @@
-﻿using Betonchel.Domain.BaseModels;
+﻿using System.Data;
+using Betonchel.Data.Extensions;
+using Betonchel.Domain.BaseModels;
 using Betonchel.Domain.DBModels;
+using Betonchel.Domain.RepositoryStatuses.FailureStatuses;
+using Betonchel.Domain.RepositoryStatuses.SuccessStatuses;
 using Microsoft.EntityFrameworkCore;
 
 namespace Betonchel.Data.Repositories;
 
-public sealed class ConcreteGradeRepository : IBaseRepository<ConcreteGrade, int>
+public class ConcreteGradeRepository : IFilterableRepository<ConcreteGrade, int>
 {
     private readonly BetonchelContext dataContext;
 
@@ -13,44 +17,59 @@ public sealed class ConcreteGradeRepository : IBaseRepository<ConcreteGrade, int
         this.dataContext = dataContext;
     }
 
-    public IQueryable<ConcreteGrade> GetAll()
+    public IQueryable<ConcreteGrade> GetAll() => dataContext.ConcreteGrades;
+
+    public ConcreteGrade? GetBy(int id) => GetAll().SingleOrDefault(cg => cg.Id == id);
+
+    public async Task<IRepositoryOperationStatus> Create(ConcreteGrade model)
     {
-        return dataContext.ConcreteGrades
-            .Include(cg => cg.WaterproofType)
-            .Include(cg => cg.FrostResistanceType);
+        await using var transaction = await dataContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
+
+        IRepositoryOperationStatus transactionStatus = await dataContext.TrySaveEntity(model)
+            ? new Success()
+            : new UnexpectedError();
+
+        transaction.CompleteWithStatus(transactionStatus);
+        return transactionStatus;
     }
 
-    public ConcreteGrade? GetBy(int id)
+    public async Task<IRepositoryOperationStatus> Update(ConcreteGrade model)
     {
-        return GetAll().FirstOrDefault(cg => cg.Id == id);
-    }
+        var toUpdate = GetBy(model.Id);
 
-    public void Create(ConcreteGrade model)
-    {
-        dataContext.Add(model);
-        dataContext.SaveChanges();
-    }
+        if (toUpdate == null) return new NotExist<ConcreteGrade>();
 
-    public void Update(ConcreteGrade model)
-    {
-        var toUpdate = dataContext.ConcreteGrades.FirstOrDefault(cg => cg.Id == model.Id);
+        await using var transaction = await dataContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
 
-        if (toUpdate == null) return;
-        
         toUpdate.Mark = model.Mark;
         toUpdate.Class = model.Class;
-        toUpdate.WaterproofTypeId = model.WaterproofTypeId;
-        toUpdate.FrostResistanceTypeId = model.FrostResistanceTypeId;
+        toUpdate.WaterproofType = model.WaterproofType;
+        toUpdate.FrostResistanceType = model.FrostResistanceType;
         toUpdate.PricePerCubicMeter = model.PricePerCubicMeter;
-        dataContext.Update(toUpdate);
-        dataContext.SaveChanges();
+
+        IRepositoryOperationStatus transactionStatus = await dataContext.TrySaveContext()
+            ? new Success()
+            : new UnexpectedError();
+        transaction.CompleteWithStatus(transactionStatus);
+        return transactionStatus;
     }
 
-    public void DeleteBy(int id)
+    public async Task<IRepositoryOperationStatus> DeleteBy(int id)
     {
-        var concreteGrade = dataContext.ConcreteGrades.Find(id);
-        if (concreteGrade is not null)
-            dataContext.ConcreteGrades.Remove(concreteGrade);
-        dataContext.SaveChanges();
+        var concreteGrade = await dataContext.ConcreteGrades.FindAsync(id);
+
+        if (concreteGrade is null) return new NotExist<ConcreteGrade>();
+
+        await using var transaction = await dataContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
+
+        dataContext.ConcreteGrades.Remove(concreteGrade);
+        IRepositoryOperationStatus transactionStatus = await dataContext.TrySaveContext()
+            ? new Success()
+            : new RestrictRelation<Application, ConcreteGrade>();
+        transaction.CompleteWithStatus(transactionStatus);
+        return transactionStatus;
     }
+
+    public IQueryable<ConcreteGrade> GetAll(params IFilter<ConcreteGrade>[] filters) =>
+        filters.Aggregate(GetAll(), (current, filter) => filter.Filter(current));
 }
