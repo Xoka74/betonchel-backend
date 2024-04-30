@@ -2,7 +2,8 @@
 using Betonchel.Data.Extensions;
 using Betonchel.Domain.BaseModels;
 using Betonchel.Domain.DBModels;
-using Betonchel.Domain.Helpers;
+using Betonchel.Domain.RepositoryStatuses.FailureStatuses;
+using Betonchel.Domain.RepositoryStatuses.SuccessStatuses;
 using Microsoft.EntityFrameworkCore;
 
 namespace Betonchel.Data.Repositories;
@@ -10,69 +11,59 @@ namespace Betonchel.Data.Repositories;
 public class ApplicationRepository : IFilterableRepository<Application, int>
 {
     private readonly BetonchelContext dataContext;
-    private readonly IFilterableRepository<ConcreteGrade, int> concreteGradeRepository;
-    private readonly IFilterableRepository<User, int> userRepository;
-    private readonly IBaseRepository<ConcretePump, int> concretePumpRepository;
 
-    public ApplicationRepository(
-        BetonchelContext dataContext,
-        IFilterableRepository<ConcreteGrade, int> concreteGradeRepository,
-        IFilterableRepository<User, int> userRepository,
-        IBaseRepository<ConcretePump, int> concretePumpRepository
-    )
+    public ApplicationRepository(BetonchelContext dataContext)
     {
         this.dataContext = dataContext;
-        this.concreteGradeRepository = concreteGradeRepository;
-        this.userRepository = userRepository;
-        this.concretePumpRepository = concretePumpRepository;
     }
 
     public IQueryable<Application> GetAll()
     {
         return dataContext.Applications
             .Include(ap => ap.ConcreteGrade)
-            .ThenInclude(cg => cg.WaterproofType)
-            .Include(ap => ap.ConcreteGrade)
-            .ThenInclude(cg => cg.FrostResistanceType)
             .Include(ap => ap.ConcretePump)
             .Include(ap => ap.User);
     }
 
+    public IQueryable<Application> GetAll(params IFilter<Application>[] filters) =>
+        filters.Aggregate(GetAll(), (current, filter) => filter.Filter(current));
+
     public Application? GetBy(int id) => GetAll().FirstOrDefault(a => a.Id == id);
 
-    public RepositoryOperationStatus Create(Application model)
+    public async Task<IRepositoryOperationStatus> Create(Application model)
     {
-        using var transaction = dataContext.Database.BeginTransaction(IsolationLevel.RepeatableRead);
+        await using var transaction = await dataContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
 
-        var (user, concreteGrade, concretePump) = GetForeignEntities(model);
+        var (user, concreteGrade, concretePump) = await GetForeignEntities(model);
 
-        if (user is null || concreteGrade is null || (concretePump is null && model.ConcretePumpId is not null))
-            return RepositoryOperationStatus.ForeignKeyViolation;
+        if (user is null) return new NotExist<User>();
+        if (concreteGrade is null) return new NotExist<ConcreteGrade>();
+        if (concretePump is null && model.ConcretePumpId is not null) return new NotExist<ConcretePump>();
 
         model.User = user;
         model.ConcreteGrade = concreteGrade;
         model.ConcretePump = concretePump;
 
-        var transactionStatus = dataContext.TrySaveEntity(model)
-            ? RepositoryOperationStatus.Success
-            : RepositoryOperationStatus.UnexpectedError;
+        IRepositoryOperationStatus transactionStatus = await dataContext.TrySaveEntity(model)
+            ? new Success()
+            : new UnexpectedError();
         transaction.CompleteWithStatus(transactionStatus);
         return transactionStatus;
     }
 
-    public RepositoryOperationStatus Update(Application model)
+    public async Task<IRepositoryOperationStatus> Update(Application model)
     {
         var toUpdate = GetBy(model.Id);
 
-        if (toUpdate is null)
-            return RepositoryOperationStatus.NonExistentEntity;
+        if (toUpdate is null) return new NotExist<Application>();
 
-        using var transaction = dataContext.Database.BeginTransaction(IsolationLevel.RepeatableRead);
+        await using var transaction = await dataContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
 
-        var (user, concreteGrade, concretePump) = GetForeignEntities(model);
+        var (user, concreteGrade, concretePump) = await GetForeignEntities(model);
 
-        if (user is null || concreteGrade is null || (concretePump is null && model.ConcretePumpId is not null))
-            return RepositoryOperationStatus.ForeignKeyViolation;
+        if (user is null) return new NotExist<User>();
+        if (concreteGrade is null) return new NotExist<ConcreteGrade>();
+        if (concretePump is null && model.ConcretePumpId is not null) return new NotExist<ConcretePump>();
 
         toUpdate.CustomerName = model.CustomerName;
         toUpdate.UserId = model.UserId;
@@ -86,29 +77,26 @@ public class ApplicationRepository : IFilterableRepository<Application, int>
         toUpdate.Description = model.Description;
         toUpdate.Status = model.Status;
 
-        var transactionStatus = dataContext.TrySaveContext()
-            ? RepositoryOperationStatus.Success
-            : RepositoryOperationStatus.UnexpectedError;
+        IRepositoryOperationStatus transactionStatus = await dataContext.TrySaveContext()
+            ? new Success()
+            : new UnexpectedError();
         transaction.CompleteWithStatus(transactionStatus);
         return transactionStatus;
     }
 
-    public RepositoryOperationStatus DeleteBy(int id)
+    public Task<IRepositoryOperationStatus> DeleteBy(int id)
     {
         throw new NotImplementedException();
     }
 
-    public IQueryable<Application> GetFiltered(Func<Application, bool> selector) => GetAll().Where(a => selector(a));
-
-    private (User?, ConcreteGrade?, ConcretePump?) GetForeignEntities(Application model)
+    private async Task<(User?, ConcreteGrade?, ConcretePump?)> GetForeignEntities(Application model)
     {
-        var user = userRepository.GetBy(model.UserId);
-        var concreteGrade = concreteGradeRepository.GetBy(model.ConcreteGradeId);
-        var concretePump = model.ConcretePumpId is null
-            ? null
-            : concretePumpRepository.GetBy(model.ConcretePumpId.Value);
+        var user = await dataContext.Users.SingleOrDefaultAsync(cg => cg.Id == model.UserId);
+        var concreteGrade = await dataContext.ConcreteGrades
+            .SingleOrDefaultAsync(cg => cg.Id == model.ConcreteGradeId);
+        var concretePump = model.ConcretePumpId is not null
+            ? await dataContext.ConcretePumps.SingleOrDefaultAsync(pump => pump.Id == model.ConcretePumpId)
+            : null;
         return (user, concreteGrade, concretePump);
     }
-
-    public IQueryable<Application> GetFiltered(Specification<Application> filter) => GetAll().Where(filter);
 }

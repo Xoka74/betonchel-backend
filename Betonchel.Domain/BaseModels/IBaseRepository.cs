@@ -1,13 +1,11 @@
-﻿using Betonchel.Domain.Helpers;
+﻿namespace Betonchel.Domain.BaseModels;
 
-namespace Betonchel.Domain.BaseModels;
-
-public interface IBaseRepository<TDbModel, in TDbModelPk> 
+public interface IBaseRepository<TDbModel, in TDbModelPk>
     where TDbModel : Entity<TDbModelPk>
 {
     public IQueryable<TDbModel> GetAll();
     public TDbModel? GetBy(TDbModelPk id);
-    public RepositoryOperationStatus Create(TDbModel model);
-    public RepositoryOperationStatus Update(TDbModel model);
-    public RepositoryOperationStatus DeleteBy(TDbModelPk id);
+    public Task<IRepositoryOperationStatus> Create(TDbModel model);
+    public Task<IRepositoryOperationStatus> Update(TDbModel model);
+    public Task<IRepositoryOperationStatus> DeleteBy(TDbModelPk id);
 }

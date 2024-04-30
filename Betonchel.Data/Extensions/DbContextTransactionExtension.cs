@@ -1,16 +1,16 @@
-﻿using Betonchel.Domain.Helpers;
+﻿using Betonchel.Domain.BaseModels;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Betonchel.Data.Extensions;
 
 public static class DbContextTransactionExtension
 {
-    public static void CompleteWithStatus(this IDbContextTransaction transaction,
-        RepositoryOperationStatus transactionStatus)
+    public static void CompleteWithStatus(this IDbContextTransaction transaction, 
+        IRepositoryOperationStatus transactionStatus)
     {
-        if (transactionStatus != RepositoryOperationStatus.Success)
-            transaction.Rollback();
-        else
+        if (transactionStatus is ISuccessOperationStatus)
             transaction.Commit();
+        else
+            transaction.Rollback();
     }
 }

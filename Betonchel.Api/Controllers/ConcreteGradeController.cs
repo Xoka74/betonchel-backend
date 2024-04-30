@@ -1,12 +1,11 @@
 ﻿using Betonchel.Domain.BaseModels;
 using Betonchel.Domain.DBModels;
-using Betonchel.Domain.Helpers;
 using Betonchel.Domain.JsonModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Betonchel.Api.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/concrete_grades")]
 [ApiController]
 public class ConcreteGradeController : ControllerBase
 {
@@ -31,11 +30,11 @@ public class ConcreteGradeController : ControllerBase
     {
         if (!ModelState.IsValid) return BadRequest(ModelState.ValidationState);
 
-        return repository.Create(userConcreteGrade.ToConcreteGrade()) switch
-        {
-            RepositoryOperationStatus.Success => Ok(),
-            _ => StatusCode(500, "The database was unable to save the entity")
-        };
+        var status = await repository.Create(userConcreteGrade.ToConcreteGrade());
+        
+        return status is ISuccessOperationStatus
+            ? Ok(status.Tokenize())
+            : BadRequest(status.Tokenize());
     }
 
     [HttpPut]
@@ -44,24 +43,21 @@ public class ConcreteGradeController : ControllerBase
     {
         if (!ModelState.IsValid) return BadRequest(ModelState.ValidationState);
 
-        return repository.Update(userConcreteGrade.ToConcreteGrade(id)) switch
-        {
-            RepositoryOperationStatus.ForeignKeyViolation => BadRequest("Foreign keys is incorrect"),
-            RepositoryOperationStatus.NonExistentEntity => NotFound(),
-            RepositoryOperationStatus.Success => Ok(),
-            _ => StatusCode(500, "The database was unable to save the entity")
-        };
+        var status = await repository.Update(userConcreteGrade.ToConcreteGrade(id));
+        
+        return status is ISuccessOperationStatus
+            ? Ok(status.Tokenize())
+            : BadRequest(status.Tokenize());
     }
 
     [HttpDelete]
     [Route("delete")]
     public async Task<IActionResult> Delete([FromQuery] int id)
     {
-        return repository.DeleteBy(id) switch
-        {
-            RepositoryOperationStatus.NonExistentEntity => NotFound(),
-            RepositoryOperationStatus.Success => Ok(),
-            _ => StatusCode(500, "The database was unable to save the entity")
-        };
+        var status = await repository.DeleteBy(id);
+        
+        return status is ISuccessOperationStatus
+            ? Ok(status.Tokenize())
+            : BadRequest(status.Tokenize());
     }
 }

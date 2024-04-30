@@ -45,10 +45,8 @@ public class Startup
     private static void AddRepositories(IServiceCollection services)
     {
         services.AddScoped<IFilterableRepository<ConcreteGrade, int>, ConcreteGradeRepository>();
-        services.AddScoped<IFilterableRepository<WaterproofType, int>, WaterproofTypeRepository>();
-        services.AddScoped<IFilterableRepository<FrostResistanceType, int>, FrostResistanceTypeRepository>();
         services.AddScoped<IFilterableRepository<User, int>, UserRepository>();
         services.AddScoped<IBaseRepository<ConcretePump, int>, ConcretePumpRepository>();
-        services.AddScoped<IFilterableRepository<Application, int>, ApplicationRepository>();
+        services.AddScoped<ApplicationRepository>();
     }
 }

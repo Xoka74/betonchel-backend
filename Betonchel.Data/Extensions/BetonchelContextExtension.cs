@@ -5,11 +5,11 @@ namespace Betonchel.Data.Extensions;
 
 public static class BetonchelContextExtension
 {
-    public static bool TrySaveContext(this BetonchelContext dataContext)
+    public static async Task<bool> TrySaveContext(this BetonchelContext dataContext)
     {
         try
         {
-            dataContext.SaveChanges();
+            await dataContext.SaveChangesAsync();
             return true;
         }
         catch (DbUpdateException)
@@ -18,12 +18,12 @@ public static class BetonchelContextExtension
         }
     }
     
-    public static bool TrySaveEntity<TDbModelPk>(this BetonchelContext dataContext, Entity<TDbModelPk> model)
+    public static async Task<bool> TrySaveEntity<TDbModelPk>(this BetonchelContext dataContext, Entity<TDbModelPk> model)
     {
         try
         {
-            dataContext.Add(model);
-            dataContext.SaveChanges();
+            await dataContext.AddAsync(model);
+            await dataContext.SaveChangesAsync();
             return true;
         }
         catch (DbUpdateException)

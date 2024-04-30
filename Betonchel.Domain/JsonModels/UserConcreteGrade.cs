@@ -58,8 +58,8 @@ public class UserConcreteGrade : IValidatableObject
             Id = id,
             Mark = Mark,
             Class = Class,
-            FrostResistanceType = new FrostResistanceType { Name = FrostResistanceType },
-            WaterproofType = new WaterproofType { Name = WaterproofType },
+            FrostResistanceType = FrostResistanceType,
+            WaterproofType = WaterproofType,
             PricePerCubicMeter = PricePerCubicMeter
         };
     }

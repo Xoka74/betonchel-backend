@@ -2,7 +2,8 @@
 using Betonchel.Data.Extensions;
 using Betonchel.Domain.BaseModels;
 using Betonchel.Domain.DBModels;
-using Betonchel.Domain.Helpers;
+using Betonchel.Domain.RepositoryStatuses.FailureStatuses;
+using Betonchel.Domain.RepositoryStatuses.SuccessStatuses;
 using Microsoft.EntityFrameworkCore;
 
 namespace Betonchel.Data.Repositories;
@@ -20,46 +21,44 @@ public class ConcretePumpRepository : IBaseRepository<ConcretePump, int>
 
     public ConcretePump? GetBy(int id) => GetAll().SingleOrDefault(pump => pump.Id == id);
 
-    public RepositoryOperationStatus Create(ConcretePump model)
+    public async Task<IRepositoryOperationStatus> Create(ConcretePump model)
     {
-        using var transaction = dataContext.Database.BeginTransaction(IsolationLevel.RepeatableRead);
+        await using var transaction = await dataContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
 
-        var transactionStatus = dataContext.TrySaveEntity(model)
-            ? RepositoryOperationStatus.Success
-            : RepositoryOperationStatus.UnexpectedError;
+        IRepositoryOperationStatus transactionStatus = await dataContext.TrySaveEntity(model)
+            ? new Success()
+            : new UnexpectedError();
         transaction.CompleteWithStatus(transactionStatus);
         return transactionStatus;
     }
 
-    public RepositoryOperationStatus Update(ConcretePump model)
+    public async Task<IRepositoryOperationStatus> Update(ConcretePump model)
     {
         var toUpdate = GetBy(model.Id);
 
-        if (toUpdate is null)
-            return RepositoryOperationStatus.NonExistentEntity;
+        if (toUpdate is null) return new NotExist<ConcretePump>();
 
         toUpdate.MaximumCapacity = model.MaximumCapacity;
         toUpdate.PipeLength = model.PipeLength;
         toUpdate.PricePerHour = model.PricePerHour;
 
-        return dataContext.TrySaveContext()
-            ? RepositoryOperationStatus.Success
-            : RepositoryOperationStatus.UnexpectedError;
+        return await dataContext.TrySaveContext()
+            ? new Success()
+            : new UnexpectedError();
     }
 
-    public RepositoryOperationStatus DeleteBy(int id)
+    public async Task<IRepositoryOperationStatus> DeleteBy(int id)
     {
-        var concretePump = dataContext.ConcretePumps.Find(id);
+        var concretePump = await dataContext.ConcretePumps.FindAsync(id);
 
-        if (concretePump is null)
-            return RepositoryOperationStatus.NonExistentEntity;
+        if (concretePump is null) return new NotExist<ConcretePump>();
 
-        using var transaction = dataContext.Database.BeginTransaction(IsolationLevel.RepeatableRead);
+        await using var transaction = await dataContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
 
         dataContext.ConcretePumps.Remove(concretePump);
-        var transactionStatus = dataContext.TrySaveContext()
-            ? RepositoryOperationStatus.Success
-            : RepositoryOperationStatus.HasReferences;
+        IRepositoryOperationStatus transactionStatus = await dataContext.TrySaveContext()
+            ? new Success()
+            : new RestrictRelation<Application, ConcretePump>();
         transaction.CompleteWithStatus(transactionStatus);
         return transactionStatus;
     }

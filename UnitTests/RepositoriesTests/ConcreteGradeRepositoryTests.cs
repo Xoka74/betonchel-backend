@@ -59,14 +59,18 @@ public class ConcreteGradeRepositoryTests
     }
 
     [TestCase]
+    public void Test2()
+    {
+    }
+
+    [TestCase]
     public void Test3()
     {
-        var repo = new WaterproofTypeRepository(dataContext);
-        var filter = new WaterproofTypeNameFilter("w1");
-        var cgs = repo.GetFiltered(filter);
-        foreach (var cg in cgs)
+        var appRepo = new ApplicationRepository(dataContext);
+        var filter = new ApplicationDateFilter(DateTime.Parse("28/07/2024"));
+        foreach (var cg in appRepo.GetAll(filter))
         {
-            Console.Write(cg);
+            Console.WriteLine(cg);
         }
     }
 }
