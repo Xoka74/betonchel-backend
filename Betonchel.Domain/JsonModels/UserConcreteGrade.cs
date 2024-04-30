@@ -5,51 +5,53 @@ namespace Betonchel.Domain.JsonModels;
 
 public class UserConcreteGrade : IValidatableObject
 {
-    [Required] 
-    public string Mark { get; set; }
-    [Required] 
-    public string Class { get; set; }
-    [Required] 
-    public string WaterproofType { get; set; }
-    [Required]
-    public string FrostResistanceType { get; set; }
-    [Required] 
-    public double PricePerCubicMeter { get; set; }
+    [Required] public string Mark { get; set; }
+    [Required] public string Class { get; set; }
+    [Required] public string WaterproofType { get; set; }
+    [Required] public string FrostResistanceType { get; set; }
+    [Required] public double PricePerCubicMeter { get; set; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         if (PricePerCubicMeter < 0)
             yield return new ValidationResult(
-                $"Price for cubic meter of concrete should be positive, but given {PricePerCubicMeter}",
+                "PricePerCubicMeterIsNegative",
                 new[] { nameof(PricePerCubicMeter) }
             );
 
-        if (!Mark.StartsWith("m", StringComparison.InvariantCultureIgnoreCase) || Mark.Length > 10)
+        foreach (var validation in ValidateName(Mark, "m", 10, nameof(Mark)))
+            yield return validation;
+
+        foreach (var validation in ValidateName(Class, "b", 10, nameof(Class)))
+            yield return validation;
+
+        foreach (var validation in ValidateName(FrostResistanceType, "f", 10, nameof(FrostResistanceType)))
+            yield return validation;
+
+        foreach (var validation in ValidateName(WaterproofType, "w", 10, nameof(WaterproofType)))
+            yield return validation;
+    }
+
+    private IEnumerable<ValidationResult> ValidateName(
+        string name,
+        string nameBeginning,
+        int maxLength,
+        string fieldName
+    )
+    {
+        if (!name.StartsWith(nameBeginning, StringComparison.InvariantCultureIgnoreCase))
             yield return new ValidationResult(
-                $"Mark of concrete should start with 'M' and have maximum length 10, but given {Mark}",
-                new[] { nameof(Mark) }
+                $"{fieldName}ShouldStartWith{nameBeginning}",
+                new[] { fieldName }
             );
 
-        if (!Class.StartsWith("b", StringComparison.InvariantCultureIgnoreCase) || Class.Length > 10)
+        if (name.Length > maxLength)
             yield return new ValidationResult(
-                $"Class of concrete should start with 'B' and have maximum length 10, but given {Class}",
-                new[] { nameof(Class) }
-            );
-
-        if (!FrostResistanceType.StartsWith("f", StringComparison.InvariantCultureIgnoreCase) ||
-            FrostResistanceType.Length > 10)
-            yield return new ValidationResult(
-                $"Frost resistance type of concrete should start with 'F' and have maximum length 10, but given {FrostResistanceType}",
-                new[] { nameof(FrostResistanceType) }
-            );
-
-        if (!WaterproofType.StartsWith("w", StringComparison.InvariantCultureIgnoreCase) ||
-            WaterproofType.Length > 10)
-            yield return new ValidationResult(
-                $"Waterproof type of concrete should start with 'W' and have maximum length 10, but given {WaterproofType}",
-                new[] { nameof(WaterproofType) }
+                $"{fieldName}TooLong",
+                new[] { fieldName }
             );
     }
+
 
     public ConcreteGrade ToConcreteGrade(int id = 0)
     {
