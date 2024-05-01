@@ -1,8 +1,11 @@
+using Betonchel.Api.SwaggerConfiguration;
 using Betonchel.Data;
 using Betonchel.Data.Repositories;
 using Betonchel.Domain.BaseModels;
 using Betonchel.Domain.DBModels;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+
 
 namespace Betonchel.Api;
 
@@ -22,12 +25,13 @@ public class Startup
 
         AddRepositories(services);
 
-        services.AddHttpClient(
-            "UserCheck",
-            client => client.BaseAddress = new Uri(configuration["AuthenticationServer:BaseUrl"])
-        );
-
         services.AddControllers();
+        
+        services.AddSwaggerGen(c =>
+        {
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "Betonchel API", Version = "v1" });
+            c.SchemaFilter<StartsWithSchemaFilter>();
+        });
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -40,6 +44,13 @@ public class Startup
         app.UseRouting();
 
         app.UseEndpoints(endpoints => endpoints.MapControllers());
+        
+        app.UseSwagger();
+        
+        app.UseSwaggerUI(c =>
+        {
+            c.SwaggerEndpoint("v1/swagger.json", "Betonchel API V1");
+        });
     }
 
     private static void AddRepositories(IServiceCollection services)

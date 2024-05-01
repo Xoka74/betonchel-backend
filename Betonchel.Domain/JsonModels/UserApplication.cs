@@ -3,68 +3,45 @@ using Betonchel.Domain.DBModels;
 
 namespace Betonchel.Domain.JsonModels;
 
-public class UserApplication : IValidatableObject
+public class UserApplication
 {
-    [Required] public string CustomerName { get; set; }
-    [Required] public int UserId { get; set; }
-    [Required] public int ConcreteGradeId { get; set; }
-    [Required] public double TotalPrice { get; set; }
+    [Required]
+    [StringLength(50, ErrorMessage = "TooLong")]
+    public string CustomerName { get; set; }
+
+    [Required]
+    [Range(1, int.MaxValue, ErrorMessage = "OutOfRange")]
+    public int UserId { get; set; }
+
+    [Required]
+    [Range(1, int.MaxValue, ErrorMessage = "OutOfRange")]
+    public int ConcreteGradeId { get; set; }
+
+    [Required]
+    [Range(0, double.MaxValue, ErrorMessage = "OutOfRange")]
+    public double TotalPrice { get; set; }
+
+    [Range(1, int.MaxValue, ErrorMessage = "OutOfRange")]
     public int? ConcretePumpId { get; set; }
-    [Required] public string ContactData { get; set; }
-    [Required] public float Volume { get; set; }
+
+    [Required]
+    [StringLength(512, ErrorMessage = "TooLong")]
+    public string ContactData { get; set; }
+
+    [Required]
+    [Range(0, float.MaxValue, ErrorMessage = "OutOfRange")]
+    public float Volume { get; set; }
+
+    [StringLength(512, ErrorMessage = "TooLong")]
     public string? DeliveryAddress { get; set; }
+
     [Required] public DateTime DeliveryDate { get; set; }
+
+    [StringLength(512, ErrorMessage = "TooLong")]
     public string? Description { get; set; }
-    public string? Status { get; set; }
 
-
-    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-    {
-        if (CustomerName.Length > 50)
-            yield return new ValidationResult(
-                "CustomerNameTooLong",
-                new[] { nameof(CustomerName) }
-            );
-
-        var numericValidations = new List<ValidationResult?>()
-        {
-            ValidateIfPositive(UserId, nameof(UserId)),
-            ValidateIfPositive(ConcreteGradeId, nameof(ConcreteGradeId)),
-            ValidateIfPositive(TotalPrice, nameof(TotalPrice)),
-            ValidateIfPositive(Volume, nameof(Volume))
-        };
-
-        if (ConcretePumpId is not null)
-            numericValidations.Add(ValidateIfPositive(ConcretePumpId.Value, nameof(ConcretePumpId)));
-
-        foreach (var validation in numericValidations.Where(validation => validation != null))
-            yield return validation;
-
-        if (Description is not null && Description.Length > 512)
-            yield return new ValidationResult(
-                "DescriptionTooLong",
-                new[] { nameof(Description) }
-            );
-
-        if (Status != null && !Enum.TryParse(typeof(ApplicationStatus), Status, out var status))
-        {
-            yield return new ValidationResult(
-                "IncorrectApplicationStatus",
-                new[] { nameof(ApplicationStatus) }
-            );
-        }
-    }
-
-    private static ValidationResult? ValidateIfPositive(double id, string fieldName)
-    {
-        if (id <= 0)
-            return new ValidationResult(
-                $"{fieldName}NotPositive",
-                new[] { fieldName }
-            );
-
-        return null;
-    }
+    [Range(0, 4, ErrorMessage = "NotExisted")]
+    public ApplicationStatus? Status { get; set; }
 
     public Application ToApplication(int id = 0)
     {
@@ -81,7 +58,7 @@ public class UserApplication : IValidatableObject
             DeliveryAddress = DeliveryAddress,
             DeliveryDate = DeliveryDate,
             Description = Description,
-            Status = Status is null ? ApplicationStatus.Created : Enum.Parse<ApplicationStatus>(Status)
+            Status = Status ?? ApplicationStatus.Created
         };
     }
 }

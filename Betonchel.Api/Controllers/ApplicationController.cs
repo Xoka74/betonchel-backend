@@ -1,5 +1,4 @@
-﻿using System.Net.Http.Headers;
-using System.Text;
+﻿using Betonchel.Api.Utils;
 using Betonchel.Data.Repositories;
 using Betonchel.Domain.BaseModels;
 using Betonchel.Domain.DBModels;
@@ -25,7 +24,7 @@ public class ApplicationController : ControllerBase
     public async Task<IActionResult> GetBy(int? id, [FromQuery] ApplicationStatus? status, [FromQuery] DateTime? date)
     {
         var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
-        if (accessToken is null || !await CheckAuthenticationByAccessToken(accessToken))
+        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken))
             return Unauthorized();
         
         if (id is not null && status is null && date is null)
@@ -47,7 +46,7 @@ public class ApplicationController : ControllerBase
     public async Task<IActionResult> Create([FromBody] UserApplication userApplication)
     {
         var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
-        if (accessToken is null || !await CheckAuthenticationByAccessToken(accessToken))
+        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken))
             return Unauthorized();
         
         if (!ModelState.IsValid) return BadRequest(ModelState.ValidationState);
@@ -64,7 +63,7 @@ public class ApplicationController : ControllerBase
     public async Task<IActionResult> Edit(int id, [FromBody] UserApplication userApplication)
     {
         var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
-        if (accessToken is null || !await CheckAuthenticationByAccessToken(accessToken))
+        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken))
             return Unauthorized();
 
         if (!ModelState.IsValid) return BadRequest(ModelState.ValidationState);
@@ -81,24 +80,5 @@ public class ApplicationController : ControllerBase
     public Task<IActionResult> Delete(int id)
     {
         throw new NotImplementedException();
-    }
-    
-    public async Task<bool> CheckAuthenticationByAccessToken(string accessToken)
-    {
-        try
-        {
-            using var httpClient = new HttpClient();
-
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            var content = new StringContent("", Encoding.UTF8, "application/json");
-            var response = await httpClient.PostAsync("https://localhost:5001/api/Authenticate/check", content);
-
-            return response.IsSuccessStatusCode;
-        }
-        catch (Exception)
-        {
-            return false;
-        }
     }
 }
