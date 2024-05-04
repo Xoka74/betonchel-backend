@@ -1,4 +1,5 @@
-﻿using Betonchel.Domain.BaseModels;
+﻿using Betonchel.Api.Utils;
+using Betonchel.Domain.BaseModels;
 using Betonchel.Domain.DBModels;
 using Betonchel.Domain.JsonModels;
 using Microsoft.AspNetCore.Mvc;
@@ -17,9 +18,13 @@ public class ConcreteGradeController : ControllerBase
     }
 
     [HttpGet]
-    [Route("get")]
-    public async Task<IActionResult> Get([FromQuery] int id)
+    [Route("{id:int?}")]
+    public async Task<IActionResult> Get(int id)
     {
+        var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
+        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken))
+            return Unauthorized();
+        
         var concreteGrade = repository.GetBy(id);
         return concreteGrade is null ? NotFound() : Ok(concreteGrade);
     }
@@ -28,6 +33,10 @@ public class ConcreteGradeController : ControllerBase
     [Route("create")]
     public async Task<IActionResult> Create([FromBody] UserConcreteGrade userConcreteGrade)
     {
+        var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
+        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken))
+            return Unauthorized();
+        
         if (!ModelState.IsValid) return BadRequest(ModelState.ValidationState);
 
         var status = await repository.Create(userConcreteGrade.ToConcreteGrade());
@@ -38,9 +47,13 @@ public class ConcreteGradeController : ControllerBase
     }
 
     [HttpPut]
-    [Route("edit")]
-    public async Task<IActionResult> Edit([FromQuery] int id, [FromBody] UserConcreteGrade userConcreteGrade)
+    [Route("edit/{id:int}")]
+    public async Task<IActionResult> Edit(int id, [FromBody] UserConcreteGrade userConcreteGrade)
     {
+        var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
+        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken))
+            return Unauthorized();
+        
         if (!ModelState.IsValid) return BadRequest(ModelState.ValidationState);
 
         var status = await repository.Update(userConcreteGrade.ToConcreteGrade(id));
@@ -51,9 +64,13 @@ public class ConcreteGradeController : ControllerBase
     }
 
     [HttpDelete]
-    [Route("delete")]
-    public async Task<IActionResult> Delete([FromQuery] int id)
+    [Route("delete/{id:int}")]
+    public async Task<IActionResult> Delete(int id)
     {
+        var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
+        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken))
+            return Unauthorized();
+        
         var status = await repository.DeleteBy(id);
         
         return status is ISuccessOperationStatus
