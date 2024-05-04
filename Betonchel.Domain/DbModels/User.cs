@@ -1,14 +1,15 @@
 ﻿using System.Text.Json.Serialization;
 using Betonchel.Domain.BaseModels;
+using Microsoft.AspNetCore.Identity;
 
 namespace Betonchel.Domain.DBModels;
 
-public class User : Entity<int>
+public class User : IdentityUser
 {
-    public string FullName;
-    public string Email;
-    public UserGrade Grade;
-    public string PasswordHash;
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public string? RefreshToken { get; set; }
+    public DateTime RefreshTokenExpiryTime { get; set; }
 
     [JsonIgnore]
     public ICollection<Application> Application;

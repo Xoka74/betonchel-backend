@@ -9,19 +9,18 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Betonchel.Identity.Controllers;
+namespace Betonchel.Api.Controllers;
 
-
-[Route("api/[controller]")]
+[Route("api/auth")]
 [ApiController]
-public class AuthenticateController : ControllerBase
+public class AuthController : ControllerBase
 {
-    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly UserManager<User> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IConfiguration _configuration;
 
-    public AuthenticateController(
-        UserManager<ApplicationUser> userManager,
+    public AuthController(
+        UserManager<User> userManager,
         RoleManager<IdentityRole> roleManager,
         IConfiguration configuration)
     {
@@ -70,6 +69,14 @@ public class AuthenticateController : ControllerBase
     }
     
     [HttpPost]
+    [Route("check")]
+    [Authorize]
+    public async Task<IActionResult> Check()
+    {
+        return Ok("Ok");
+    }
+    
+    [HttpPost]
     [Route("register-manager")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Register([FromBody] RegisterModel model)
@@ -78,7 +85,7 @@ public class AuthenticateController : ControllerBase
         if (userExists != null)
             return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
 
-        ApplicationUser user = new()
+        User user = new()
         {
             UserName = model.Email,
             Email = model.Email,
@@ -110,7 +117,7 @@ public class AuthenticateController : ControllerBase
         if (userExists != null)
             return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
 
-        ApplicationUser user = new()
+        User user = new()
         {
             UserName = model.Email,
             Email = model.Email,

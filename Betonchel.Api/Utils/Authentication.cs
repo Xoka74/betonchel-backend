@@ -14,7 +14,7 @@ public static class Authentication
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             var content = new StringContent("", Encoding.UTF8, "application/json");
-            var response = await httpClient.PostAsync("https://localhost:5001/api/Authenticate/check", content);
+            var response = await httpClient.PostAsync("https://localhost:7016/api/auth/check", content);
 
             return response.IsSuccessStatusCode;
         }

@@ -10,7 +10,11 @@ internal class UserConfiguration : IEntityTypeConfiguration<User>
     {
         builder.HasKey(e => e.Id);
         
-        builder.Property(e => e.FullName)
+        builder.Property(e => e.FirstName)
+            .HasColumnType("varchar(50)")
+            .IsRequired();
+        
+        builder.Property(e => e.LastName)
             .HasColumnType("varchar(50)")
             .IsRequired();
 
@@ -19,9 +23,6 @@ internal class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired();
         builder.HasCheckConstraint("CK_Email", "\"Email\" LIKE '%@%'");
         builder.HasIndex(user => user.Email).IsUnique();
-
-        builder.Property(e => e.Grade)
-            .IsRequired();
 
         builder.Property(e => e.PasswordHash)
             .HasColumnType("varchar(70)")

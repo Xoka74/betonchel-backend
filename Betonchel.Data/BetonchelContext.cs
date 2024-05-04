@@ -1,10 +1,11 @@
 ﻿using Betonchel.Data.Configurations;
 using Betonchel.Domain.DBModels;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Betonchel.Data;
 
-public class BetonchelContext : DbContext
+public class BetonchelContext : IdentityDbContext<User>
 {
     public DbSet<Application> Applications { get; set; }
     public DbSet<ConcretePump> ConcretePumps { get; set; }
@@ -15,15 +16,12 @@ public class BetonchelContext : DbContext
     {
     }
 
-    // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    //     => optionsBuilder.LogTo(Console.WriteLine);
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new ApplicationConfiguration());
         modelBuilder.ApplyConfiguration(new ConcreteGradeConfiguration());
         modelBuilder.ApplyConfiguration(new ConcretePumpConfiguration());
-        modelBuilder.ApplyConfiguration(new UserConfiguration());
+        // modelBuilder.ApplyConfiguration(new UserConfiguration());
 
         base.OnModelCreating(modelBuilder);
     }

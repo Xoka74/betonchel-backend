@@ -23,9 +23,9 @@ public class ApplicationController : ControllerBase
     [Route("{id:int?}")]
     public async Task<IActionResult> GetBy(int? id, [FromQuery] ApplicationStatus? status, [FromQuery] DateTime? date)
     {
-        var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
-        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken))
-            return Unauthorized();
+        // var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
+        // if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken))
+        //     return Unauthorized();
         
         if (id is not null && status is null && date is null)
         {
@@ -45,9 +45,9 @@ public class ApplicationController : ControllerBase
     [Route("create")]
     public async Task<IActionResult> Create([FromBody] UserApplication userApplication)
     {
-        var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
-        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken))
-            return Unauthorized();
+        // var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
+        // if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken))
+        //     return Unauthorized();
         
         if (!ModelState.IsValid) return BadRequest(ModelState.ValidationState);
 
@@ -62,9 +62,9 @@ public class ApplicationController : ControllerBase
     [Route("edit/{id:int}")]
     public async Task<IActionResult> Edit(int id, [FromBody] UserApplication userApplication)
     {
-        var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
-        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken))
-            return Unauthorized();
+        // var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
+        // if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken))
+        //     return Unauthorized();
 
         if (!ModelState.IsValid) return BadRequest(ModelState.ValidationState);
 

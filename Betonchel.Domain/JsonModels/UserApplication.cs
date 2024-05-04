@@ -10,8 +10,7 @@ public class UserApplication
     public string CustomerName { get; set; }
 
     [Required]
-    [Range(1, int.MaxValue, ErrorMessage = "OutOfRange")]
-    public int UserId { get; set; }
+    public string UserId { get; set; }
 
     [Required]
     [Range(1, int.MaxValue, ErrorMessage = "OutOfRange")]

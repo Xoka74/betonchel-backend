@@ -5,7 +5,7 @@ namespace Betonchel.Domain.DBModels;
 public class Application : Entity<int>
 {
     public string CustomerName { get; set; }
-    public int UserId { get; set; }
+    public string UserId { get; set; }
     public int ConcreteGradeId { get; set; }
     public double TotalPrice { get; set; }
     public int? ConcretePumpId { get; set; }
