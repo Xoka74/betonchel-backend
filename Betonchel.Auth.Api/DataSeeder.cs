@@ -30,9 +30,7 @@ public class DataSeeder
                 var admin = new ApplicationUser
                 {
                     UserName = adminEmail,
-                    Email = adminEmail,
-                    FirstName = _configuration["Admin:FirstName"],
-                    LastName = _configuration["Admin:LastName"]
+                    Email = adminEmail
                 };
 
                 var result = await _userManager.CreateAsync(admin, _configuration["Admin:Password"]);

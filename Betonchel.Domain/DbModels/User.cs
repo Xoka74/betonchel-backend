@@ -7,8 +7,6 @@ public class User : Entity<int>
 {
     public string FullName;
     public string Email;
-    public UserGrade Grade;
-    public string PasswordHash;
 
     [JsonIgnore]
     public ICollection<Application> Application;

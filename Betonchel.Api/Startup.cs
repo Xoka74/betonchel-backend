@@ -1,4 +1,5 @@
 using Betonchel.Api.SwaggerConfiguration;
+using Betonchel.Api.Utils;
 using Betonchel.Data;
 using Betonchel.Data.Repositories;
 using Betonchel.Domain.BaseModels;
@@ -24,9 +25,10 @@ public class Startup
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
 
         AddRepositories(services);
+        AddUrls(services, configuration);
 
         services.AddControllers();
-        
+
         services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Betonchel API", Version = "v1" });
@@ -44,13 +46,16 @@ public class Startup
         app.UseRouting();
 
         app.UseEndpoints(endpoints => endpoints.MapControllers());
-        
+
         app.UseSwagger();
-        
-        app.UseSwaggerUI(c =>
-        {
-            c.SwaggerEndpoint("v1/swagger.json", "Betonchel API V1");
-        });
+
+        app.UseSwaggerUI(c => { c.SwaggerEndpoint("v1/swagger.json", "Betonchel API V1"); });
+    }
+
+    private static void AddUrls(IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddScoped<CheckUrl>(_ => new CheckUrl(configuration["AuthServer:CheckUrl"]));
+        services.AddScoped<RegisterUrl>(_ => new RegisterUrl(configuration["AuthServer:RegisterUrl"]));
     }
 
     private static void AddRepositories(IServiceCollection services)

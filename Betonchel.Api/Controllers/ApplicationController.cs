@@ -13,10 +13,12 @@ namespace Betonchel.Api.Controllers;
 public class ApplicationController : ControllerBase
 {
     private readonly IFilterableRepository<Application, int> repository;
+    private readonly string checkUrl;
 
-    public ApplicationController(ApplicationRepository repository)
+    public ApplicationController(ApplicationRepository repository, CheckUrl checkUrl)
     {
         this.repository = repository;
+        this.checkUrl = checkUrl.Value;
     }
 
     [HttpGet]
@@ -24,7 +26,7 @@ public class ApplicationController : ControllerBase
     public async Task<IActionResult> GetBy(int? id, [FromQuery] ApplicationStatus? status, [FromQuery] DateTime? date)
     {
         var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
-        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken))
+        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
             return Unauthorized();
         
         if (id is not null && status is null && date is null)
@@ -46,7 +48,7 @@ public class ApplicationController : ControllerBase
     public async Task<IActionResult> Create([FromBody] UserApplication userApplication)
     {
         var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
-        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken))
+        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
             return Unauthorized();
         
         if (!ModelState.IsValid) return BadRequest(ModelState.ValidationState);
@@ -63,7 +65,7 @@ public class ApplicationController : ControllerBase
     public async Task<IActionResult> Edit(int id, [FromBody] UserApplication userApplication)
     {
         var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
-        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken))
+        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
             return Unauthorized();
 
         if (!ModelState.IsValid) return BadRequest(ModelState.ValidationState);
