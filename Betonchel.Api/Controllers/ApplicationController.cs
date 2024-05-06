@@ -60,9 +60,9 @@ public class ApplicationController : ControllerBase
 
         var status = await repository.Create(userApplication.ToApplication());
 
-        return status is ISuccessOperationStatus
-            ? Ok(status.Tokenize())
-            : BadRequest(status.Tokenize());
+        return status is SuccessOperationStatus
+            ? Ok(status)
+            : BadRequest(status);
     }
 
     [HttpPut]
@@ -77,9 +77,9 @@ public class ApplicationController : ControllerBase
 
         var status = await repository.Update(userApplication.ToApplication(id));
 
-        return status is ISuccessOperationStatus
-            ? Ok(status.Tokenize())
-            : BadRequest(status.Tokenize());
+        return status is SuccessOperationStatus
+            ? Ok(status)
+            : BadRequest(status);
     }
 
     [HttpDelete]

@@ -8,7 +8,7 @@ public static class DbContextTransactionExtension
     public static void CompleteWithStatus(this IDbContextTransaction transaction, 
         IRepositoryOperationStatus transactionStatus)
     {
-        if (transactionStatus is ISuccessOperationStatus)
+        if (transactionStatus is SuccessOperationStatus)
             transaction.Commit();
         else
             transaction.Rollback();

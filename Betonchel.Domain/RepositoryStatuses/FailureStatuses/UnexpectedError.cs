@@ -2,7 +2,9 @@
 
 namespace Betonchel.Domain.RepositoryStatuses.FailureStatuses;
 
-public class UnexpectedError : IFailureOperationStatus
+public class UnexpectedError : FailureOperationStatus
 {
-    public string Tokenize() => "unexpectedError";
+    public UnexpectedError() : base("UnexpectedError")
+    {
+    }
 }

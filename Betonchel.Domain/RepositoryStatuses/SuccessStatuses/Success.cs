@@ -2,7 +2,6 @@
 
 namespace Betonchel.Domain.RepositoryStatuses.SuccessStatuses;
 
-public class Success : ISuccessOperationStatus
+public class Success : SuccessOperationStatus
 {
-    public string Tokenize() => "success";
 }

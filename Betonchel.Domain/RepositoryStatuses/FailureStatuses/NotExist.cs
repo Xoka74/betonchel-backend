@@ -2,7 +2,9 @@
 
 namespace Betonchel.Domain.RepositoryStatuses.FailureStatuses;
 
-public class NotExist<TModel> : IFailureOperationStatus
+public class NotExist<TModel> : FailureOperationStatus
 {
-    public string Tokenize() => $"{typeof(TModel).Name}NotExist";
+    public NotExist() : base($"{typeof(TModel).Name}NotExist")
+    {
+    }
 }

@@ -26,6 +26,6 @@ public class AuthController : ControllerBase
         var isCreated = await Authentication.Register(registerUrl, model, accessToken);
         if (!isCreated) return BadRequest();
         var status = await repository.Create(model.ToUser());
-        return Ok(status.Tokenize());
+        return Ok(status);
     }
 }

@@ -1,6 +1,8 @@
-﻿namespace Betonchel.Domain.BaseModels;
+﻿using Betonchel.Domain.RepositoryStatuses.SuccessStatuses;
+
+namespace Betonchel.Domain.BaseModels;
 
 public interface IRepositoryOperationStatus
 {
-    public string Tokenize();
+    public bool Success { get; }
 }

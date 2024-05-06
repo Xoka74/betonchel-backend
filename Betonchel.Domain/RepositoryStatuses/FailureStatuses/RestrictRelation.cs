@@ -2,9 +2,11 @@
 
 namespace Betonchel.Domain.RepositoryStatuses.FailureStatuses;
 
-public class RestrictRelation<TReferer, TReferenced> : IFailureOperationStatus
+public class RestrictRelation<TReferer, TReferenced> : FailureOperationStatus
     where TReferer : class
     where TReferenced : class
 {
-    public string Tokenize() => $"{typeof(TReferer).Name}HasRestrictReferenceTo{typeof(TReferenced).Name}";
+    public RestrictRelation() : base($"{typeof(TReferer).Name}Has{typeof(TReferenced).Name}")
+    {
+    }
 }

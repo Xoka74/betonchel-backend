@@ -55,9 +55,9 @@ public class ConcreteGradeController : ControllerBase
 
         var status = await repository.Create(userConcreteGrade.ToConcreteGrade());
 
-        return status is ISuccessOperationStatus
-            ? Ok(status.Tokenize())
-            : BadRequest(status.Tokenize());
+        return status is SuccessOperationStatus
+            ? Ok(status)
+            : BadRequest(status);
     }
 
     [HttpPut]
@@ -72,9 +72,9 @@ public class ConcreteGradeController : ControllerBase
 
         var status = await repository.Update(userConcreteGrade.ToConcreteGrade(id));
 
-        return status is ISuccessOperationStatus
-            ? Ok(status.Tokenize())
-            : BadRequest(status.Tokenize());
+        return status is SuccessOperationStatus
+            ? Ok(status)
+            : BadRequest(status);
     }
 
     [HttpDelete]
@@ -87,8 +87,8 @@ public class ConcreteGradeController : ControllerBase
 
         var status = await repository.DeleteBy(id);
 
-        return status is ISuccessOperationStatus
-            ? Ok(status.Tokenize())
-            : BadRequest(status.Tokenize());
+        return status is SuccessOperationStatus
+            ? Ok(status)
+            : BadRequest(status);
     }
 }
