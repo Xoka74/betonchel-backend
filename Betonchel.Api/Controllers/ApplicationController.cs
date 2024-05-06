@@ -22,18 +22,12 @@ public class ApplicationController : ControllerBase
     }
 
     [HttpGet]
-    [Route("{id:int?}")]
-    public async Task<IActionResult> GetBy(int? id, [FromQuery] ApplicationStatus? status, [FromQuery] DateTime? date)
+    [Route("")]
+    public async Task<IActionResult> GetAll([FromQuery] ApplicationStatus? status, [FromQuery] DateTime? date)
     {
         var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
         if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
             return Unauthorized();
-        
-        if (id is not null && status is null && date is null)
-        {
-            var application = repository.GetBy(id.Value);
-            return application is null ? NotFound() : Ok(application);
-        }
 
         var applications = repository.GetAll(
             new ApplicationDateFilter(date),
@@ -43,6 +37,18 @@ public class ApplicationController : ControllerBase
         return Ok(applications);
     }
 
+    [HttpGet]
+    [Route("{id:int}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
+        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
+            return Unauthorized();
+        
+        var application = repository.GetBy(id);
+        return application is null ? NotFound() : Ok(application);
+    }
+
     [HttpPost]
     [Route("create")]
     public async Task<IActionResult> Create([FromBody] UserApplication userApplication)
@@ -50,7 +56,7 @@ public class ApplicationController : ControllerBase
         var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
         if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
             return Unauthorized();
-        
+
         if (!ModelState.IsValid) return BadRequest(ModelState.ValidationState);
 
         var status = await repository.Create(userApplication.ToApplication());
