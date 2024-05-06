@@ -22,7 +22,6 @@ public class ApplicationController : ControllerBase
     }
 
     [HttpGet]
-    [Route("")]
     public async Task<IActionResult> GetAll([FromQuery] ApplicationStatus? status, [FromQuery] DateTime? date)
     {
         var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
