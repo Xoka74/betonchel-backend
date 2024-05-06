@@ -1,8 +1,8 @@
-namespace Betonchel.Auth.Domen.Models;
+namespace Betonchel.Auth.Domen.Status.Failure;
 
-public class InvalidCredentials<TModel> : FailureOperationStatusAuth
+public class InvalidCredentials : FailureAuthStatus
 {
-    public InvalidCredentials() : base($"{typeof(TModel).Name}InvalidCredentials")
+    public InvalidCredentials() : base("InvalidCredentials", "Указан неверный логин или пароль")
     {
     }
 }

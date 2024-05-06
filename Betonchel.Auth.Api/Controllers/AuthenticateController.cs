@@ -3,8 +3,10 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Betonchel.Auth.Domen.Models;
+using Betonchel.Auth.Domen.Status;
+using Betonchel.Auth.Domen.Status.Failure;
+using Betonchel.Auth.Domen.Status.Success;
 using Betonchel.Domain.DBModels;
-using Betonchel.Domain.JsonModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -37,7 +39,7 @@ public class AuthenticateController : ControllerBase
         var user = await _userManager.FindByEmailAsync(model.Email);
 
         if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
-            return StatusCode(StatusCodes.Status500InternalServerError, new InvalidCredentials<User>());
+            return BadRequest(new InvalidCredentials());
 
         var userRoles = await _userManager.GetRolesAsync(user);
         var authClaims = new List<Claim>
@@ -61,9 +63,9 @@ public class AuthenticateController : ControllerBase
 
         await _userManager.UpdateAsync(user);
 
-        return Ok(new SuccessLoginModelStatus
+        return Ok(new LoginSuccess
         {
-            Token = new JwtSecurityTokenHandler().WriteToken(token),
+            AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
             RefreshToken = refreshToken,
             Expiration = token.ValidTo
         });
@@ -76,8 +78,7 @@ public class AuthenticateController : ControllerBase
     {
         var userExists = await _userManager.FindByEmailAsync(model.Email);
         if (userExists != null)
-            return StatusCode(StatusCodes.Status500InternalServerError,
-                new NotUnique<ApplicationUser>());
+            return BadRequest(new EmailNotUnique());
 
         ApplicationUser user = new()
         {
@@ -87,18 +88,15 @@ public class AuthenticateController : ControllerBase
         };
         var result = await _userManager.CreateAsync(user, model.Password);
         if (!result.Succeeded)
-            return StatusCode(StatusCodes.Status500InternalServerError,
-                new InvalidCredentials<User>());
+            return BadRequest(new InvalidCredentials());
 
         if (!await _roleManager.RoleExistsAsync(UserRoles.Manager))
             await _roleManager.CreateAsync(new IdentityRole(UserRoles.Manager));
 
         if (await _roleManager.RoleExistsAsync(UserRoles.Manager))
-        {
             await _userManager.AddToRoleAsync(user, UserRoles.Manager);
-        }
 
-        return Ok(new SuccessOperationStatusAuth());
+        return Ok(new Success());
     }
 
     [HttpPost]
@@ -108,8 +106,7 @@ public class AuthenticateController : ControllerBase
     {
         var userExists = await _userManager.FindByEmailAsync(model.Email);
         if (userExists != null)
-            return StatusCode(StatusCodes.Status500InternalServerError,
-                new NotUnique<ApplicationUser>());
+            return BadRequest(new EmailNotUnique());
 
         ApplicationUser user = new()
         {
@@ -119,51 +116,36 @@ public class AuthenticateController : ControllerBase
         };
         var result = await _userManager.CreateAsync(user, model.Password);
         if (!result.Succeeded)
-            return StatusCode(StatusCodes.Status500InternalServerError,
-                new InvalidCredentials<User>());
+            return BadRequest(new InvalidCredentials());
 
         if (!await _roleManager.RoleExistsAsync(UserRoles.Admin))
             await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
 
         if (await _roleManager.RoleExistsAsync(UserRoles.Admin))
-        {
             await _userManager.AddToRoleAsync(user, UserRoles.Admin);
-        }
 
-        return Ok(new SuccessOperationStatusAuth());
+        return Ok(new SuccessAuthStatus());
     }
 
     [HttpPost]
     [Route("refresh-token")]
     public async Task<IActionResult> RefreshToken(TokenModel tokenModel)
     {
-        if (tokenModel is null)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError,
-                new InvalidClientRequestError<TokenModel>());
-        }
-
         var accessToken = tokenModel.AccessToken;
         var refreshToken = tokenModel.RefreshToken;
 
         var principal = GetPrincipalFromExpiredToken(accessToken);
         if (principal == null)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError,
-                new InvalidTokenError<TokenModel>());
-        }
-
+            return BadRequest( new InvalidAccessToken());
+        
         var username = principal.Identity.Name;
 
         var user = await _userManager.FindByNameAsync(username);
 
-        if (user == null)
-            return StatusCode(StatusCodes.Status500InternalServerError,
-                new NotExist<User>());
+        if (user == null) return NotFound();
 
         if (user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
-            return StatusCode(StatusCodes.Status500InternalServerError,
-                new InvalidRefreshTokenError<User>());
+            return BadRequest(new InvalidRefreshToken());
 
         var newAccessToken = CreateToken(principal.Claims.ToList());
         var newRefreshToken = GenerateRefreshToken();
@@ -171,9 +153,9 @@ public class AuthenticateController : ControllerBase
         user.RefreshToken = newRefreshToken;
         await _userManager.UpdateAsync(user);
 
-        return Ok(new SuccessLoginModelStatus
+        return Ok(new LoginSuccess
         {
-            Token = new JwtSecurityTokenHandler().WriteToken(newAccessToken),
+            AccessToken = new JwtSecurityTokenHandler().WriteToken(newAccessToken),
             RefreshToken = newRefreshToken,
             Expiration = newAccessToken.ValidTo
         });
@@ -191,7 +173,7 @@ public class AuthenticateController : ControllerBase
         user.RefreshTokenExpiryTime = default;
         await _userManager.UpdateAsync(user);
 
-        return Ok(new SuccessOperationStatusAuth());
+        return Ok(new Success());
     }
 
     [HttpPost]
@@ -207,7 +189,7 @@ public class AuthenticateController : ControllerBase
             await _userManager.UpdateAsync(user);
         }
 
-        return Ok(new SuccessOperationStatusAuth());
+        return Ok(new Success());
     }
 
     [HttpPost]
@@ -215,7 +197,7 @@ public class AuthenticateController : ControllerBase
     [Authorize]
     public async Task<IActionResult> Check()
     {
-        return Ok(new SuccessOperationStatusAuth());
+        return Ok(new Success());
     }
 
 
