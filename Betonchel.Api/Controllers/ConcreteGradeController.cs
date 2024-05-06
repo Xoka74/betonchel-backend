@@ -3,6 +3,7 @@ using Betonchel.Domain.BaseModels;
 using Betonchel.Domain.DBModels;
 using Betonchel.Domain.JsonModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Betonchel.Api.Controllers;
 
@@ -20,8 +21,19 @@ public class ConcreteGradeController : ControllerBase
     }
 
     [HttpGet]
-    [Route("{id:int?}")]
-    public async Task<IActionResult> Get(int id)
+    public async Task<IActionResult> GetAll()
+    {
+        var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
+        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
+            return Unauthorized();
+
+        var concreteGrades = await repository.GetAll().ToListAsync();
+        return Ok(concreteGrades);
+    }
+
+    [HttpGet]
+    [Route("{id:int}")]
+    public async Task<IActionResult> GetById(int id)
     {
         var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
         if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
