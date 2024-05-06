@@ -48,7 +48,6 @@ public class UserRepository : IFilterableRepository<User, int>
             return new NotUnique<User>();
 
         toUpdate.FullName = model.FullName;
-        toUpdate.Grade = model.Grade;
         toUpdate.Email = model.Email;
 
         return await dataContext.TrySaveContext()

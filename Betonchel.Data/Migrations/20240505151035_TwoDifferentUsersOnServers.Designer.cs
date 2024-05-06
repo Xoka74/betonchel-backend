@@ -3,6 +3,7 @@ using System;
 using Betonchel.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Betonchel.Data.Migrations
 {
     [DbContext(typeof(BetonchelContext))]
-    partial class BetonchelContextModelSnapshot : ModelSnapshot
+    [Migration("20240505151035_TwoDifferentUsersOnServers")]
+    partial class TwoDifferentUsersOnServers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -1,21 +1,21 @@
-﻿using System.Net.Http.Headers;
-using System.Text;
+﻿using System.Text;
+using Newtonsoft.Json;
+using Betonchel.Domain.JsonModels;
 
 namespace Betonchel.Api.Utils;
 
 public static class Authentication
 {
-    public static async Task<bool> CheckByAccessToken(string accessToken)
+    public static async Task<bool> CheckByAccessToken(string accessToken, string checkUrl)
     {
         try
         {
-            using var httpClient = new HttpClient();
+            using var client = new HttpClient();
+            var request = new HttpRequestMessage(HttpMethod.Post, checkUrl);
+            
+            request.Headers.Add("Authorization", $"Bearer {accessToken}");
 
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            var content = new StringContent("", Encoding.UTF8, "application/json");
-            var response = await httpClient.PostAsync("https://localhost:5001/api/Authenticate/check", content);
-
+            using var response = await client.SendAsync(request);
             return response.IsSuccessStatusCode;
         }
         catch (Exception)
@@ -23,4 +23,28 @@ public static class Authentication
             return false;
         }
     }
+
+
+    
+    public static async Task<bool> Register(string registerUrl, RegisterUser user, string accessToken)
+    {
+        try
+        {
+            using var client = new HttpClient();
+            var json = JsonConvert.SerializeObject(new  { Email = user.Email, Password = user.Password });
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var request = new HttpRequestMessage(HttpMethod.Post, registerUrl);
+    
+            request.Headers.Add("Authorization", $"Bearer {accessToken}");
+            request.Content = content;
+        
+            using var response = await client.SendAsync(request);
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
 }

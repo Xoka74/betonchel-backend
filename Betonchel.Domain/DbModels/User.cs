@@ -5,10 +5,8 @@ namespace Betonchel.Domain.DBModels;
 
 public class User : Entity<int>
 {
-    public string FullName;
-    public string Email;
-    public UserGrade Grade;
-    public string PasswordHash;
+    public string FullName { get; set; }
+    public string Email { get; set; }
 
     [JsonIgnore]
     public ICollection<Application> Application;

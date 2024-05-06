@@ -26,7 +26,7 @@ internal class ApplicationConfiguration : IEntityTypeConfiguration<Application>
         builder.HasCheckConstraint("CK_TotalPrice", "\"TotalPrice\" >= 0");
 
         builder.Property(a => a.ContactData)
-            .HasColumnType("json")
+            .HasMaxLength(124)
             .IsRequired();
 
         builder.Property(a => a.Volume)
@@ -34,7 +34,7 @@ internal class ApplicationConfiguration : IEntityTypeConfiguration<Application>
         builder.HasCheckConstraint("CK_Volume", "\"Volume\" >= 0");
 
         builder.Property(a => a.DeliveryAddress)
-            .HasColumnType("json");
+            .HasMaxLength(124);
 
         builder.Property(a => a.DeliveryDate)
             .HasColumnType("timestamp")
@@ -51,7 +51,7 @@ internal class ApplicationConfiguration : IEntityTypeConfiguration<Application>
             .IsRequired();
 
         builder.Property(a => a.Description)
-            .HasColumnType("varchar(512)");
+            .HasMaxLength(512);
 
         builder.HasOne(a => a.User)
             .WithMany(e => e.Application)
