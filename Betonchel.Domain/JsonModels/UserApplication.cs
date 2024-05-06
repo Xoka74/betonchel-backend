@@ -29,7 +29,7 @@ public class UserApplication
     public string ContactData { get; set; }
 
     [Required]
-    [Range(0, float.MaxValue, ErrorMessage = "OutOfRange")]
+    [Range(0.1, float.MaxValue, ErrorMessage = "OutOfRange")]
     public float Volume { get; set; }
 
     [StringLength(512, ErrorMessage = "TooLong")]

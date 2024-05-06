@@ -13,7 +13,7 @@ public static class Authentication
             using var client = new HttpClient();
             var request = new HttpRequestMessage(HttpMethod.Post, checkUrl);
             
-            request.Headers.Add("Authorization", $"Bearer {accessToken}");
+            request.Headers.Add("Authorization", accessToken);
 
             using var response = await client.SendAsync(request);
             return response.IsSuccessStatusCode;
@@ -26,7 +26,7 @@ public static class Authentication
 
 
     
-    public static async Task<bool> Register(string registerUrl, RegisterUser user, string accessToken)
+    public static async Task<bool> Register(string registerUrl, RegisterUser user, string? accessToken)
     {
         try
         {
@@ -35,7 +35,7 @@ public static class Authentication
             var content = new StringContent(json, Encoding.UTF8, "application/json");
             var request = new HttpRequestMessage(HttpMethod.Post, registerUrl);
     
-            request.Headers.Add("Authorization", $"Bearer {accessToken}");
+            request.Headers.Add("Authorization", accessToken);
             request.Content = content;
         
             using var response = await client.SendAsync(request);

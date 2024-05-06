@@ -1,6 +1,9 @@
 using Betonchel.Data;
 using Betonchel.Data.Repositories;
+using Betonchel.Domain.BaseModels;
+using Betonchel.Domain.DBModels;
 using Betonchel.Domain.Filters;
+using Betonchel.Domain.RepositoryStatuses.SuccessStatuses;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -58,9 +61,32 @@ public class ConcreteGradeRepositoryTests
         //     .SaveChanges();
     }
 
-    [TestCase]
+    [Test]
     public void Test2()
     {
+        var appRepo = new ApplicationRepository(dataContext);
+        var model = new Application
+        {
+            Id = 12,
+            CustomerName = "Till Lindeman",
+            UserId = 2,
+            ConcreteGradeId = 6,
+            TotalPrice = 19300,
+            ConcretePumpId = 1,
+            ApplicationCreationDate = DateTime.Parse("10/10/2024"),
+            ContactData = "{\"phone\":  \"+11111\"}",
+            Volume = 123123131231,
+            DeliveryAddress = "{\"ulitsa\": \"Pushkina\"}",
+            DeliveryDate = DateTime.Parse("01/10/2024"),
+            Description = "cosino norm",
+            Status = ApplicationStatus.Rejected
+        };
+        var task = appRepo.Update(model);
+        task.Wait();
+        if (!task.IsCompletedSuccessfully) return;
+        
+        var status = task.Result; 
+        Assert.That(status is SuccessOperationStatus, Is.True);
     }
 
     [TestCase]

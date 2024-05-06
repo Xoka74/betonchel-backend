@@ -24,7 +24,7 @@ public class ApplicationController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] ApplicationStatus? status, [FromQuery] DateTime? date)
     {
-        var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
+        var accessToken = Request.Headers["Authorization"].ToString();
         if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
             return Unauthorized();
 
@@ -40,7 +40,7 @@ public class ApplicationController : ControllerBase
     [Route("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
+        var accessToken = Request.Headers["Authorization"].ToString();
         if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
             return Unauthorized();
         
@@ -52,7 +52,7 @@ public class ApplicationController : ControllerBase
     [Route("create")]
     public async Task<IActionResult> Create([FromBody] UserApplication userApplication)
     {
-        var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
+        var accessToken = Request.Headers["Authorization"].ToString();
         if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
             return Unauthorized();
 
@@ -69,7 +69,7 @@ public class ApplicationController : ControllerBase
     [Route("edit/{id:int}")]
     public async Task<IActionResult> Edit(int id, [FromBody] UserApplication userApplication)
     {
-        var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
+        var accessToken = Request.Headers["Authorization"].ToString();
         if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
             return Unauthorized();
 
@@ -84,8 +84,15 @@ public class ApplicationController : ControllerBase
 
     [HttpDelete]
     [Route("delete/{id:int}")]
-    public Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        throw new NotImplementedException();
+        var accessToken = Request.Headers["Authorization"].ToString();
+        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
+            return Unauthorized();
+        
+        var status = await repository.DeleteBy(id);
+        return status is SuccessOperationStatus
+            ? Ok(status)
+            : BadRequest(status); 
     }
 }

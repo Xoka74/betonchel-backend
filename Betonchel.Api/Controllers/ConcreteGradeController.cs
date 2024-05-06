@@ -23,7 +23,7 @@ public class ConcreteGradeController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
+        var accessToken = Request.Headers["Authorization"].ToString();
         if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
             return Unauthorized();
 
@@ -35,7 +35,7 @@ public class ConcreteGradeController : ControllerBase
     [Route("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
+        var accessToken = Request.Headers["Authorization"].ToString();
         if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
             return Unauthorized();
 
@@ -47,7 +47,7 @@ public class ConcreteGradeController : ControllerBase
     [Route("create")]
     public async Task<IActionResult> Create([FromBody] UserConcreteGrade userConcreteGrade)
     {
-        var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
+        var accessToken = Request.Headers["Authorization"].ToString();
         if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
             return Unauthorized();
 
@@ -64,7 +64,7 @@ public class ConcreteGradeController : ControllerBase
     [Route("edit/{id:int}")]
     public async Task<IActionResult> Edit(int id, [FromBody] UserConcreteGrade userConcreteGrade)
     {
-        var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
+        var accessToken = Request.Headers["Authorization"].ToString();
         if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
             return Unauthorized();
 
@@ -81,7 +81,7 @@ public class ConcreteGradeController : ControllerBase
     [Route("delete/{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
+        var accessToken = Request.Headers["Authorization"].ToString();
         if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
             return Unauthorized();
 

@@ -36,9 +36,12 @@ public class ApplicationRepository : IFilterableRepository<Application, int>
 
         var (user, concreteGrade, concretePump) = await GetForeignEntities(model);
 
-        if (user is null) return new NotExist<User>();
-        if (concreteGrade is null) return new NotExist<ConcreteGrade>();
-        if (concretePump is null && model.ConcretePumpId is not null) return new NotExist<ConcretePump>();
+        if (user is null)
+            return new MissingReference<Application, User>();
+        if (concreteGrade is null)
+            return new MissingReference<Application, ConcreteGrade>();
+        if (concretePump is null && model.ConcretePumpId is not null)
+            return new MissingReference<Application, ConcretePump>();
 
         model.User = user;
         model.ConcreteGrade = concreteGrade;
@@ -61,9 +64,12 @@ public class ApplicationRepository : IFilterableRepository<Application, int>
 
         var (user, concreteGrade, concretePump) = await GetForeignEntities(model);
 
-        if (user is null) return new NotExist<User>();
-        if (concreteGrade is null) return new NotExist<ConcreteGrade>();
-        if (concretePump is null && model.ConcretePumpId is not null) return new NotExist<ConcretePump>();
+        if (user is null)
+            return new MissingReference<Application, User>();
+        if (concreteGrade is null)
+            return new MissingReference<Application, ConcreteGrade>();
+        if (concretePump is null && model.ConcretePumpId is not null)
+            return new MissingReference<Application, ConcretePump>();
 
         toUpdate.CustomerName = model.CustomerName;
         toUpdate.UserId = model.UserId;
@@ -84,9 +90,21 @@ public class ApplicationRepository : IFilterableRepository<Application, int>
         return transactionStatus;
     }
 
-    public Task<IRepositoryOperationStatus> DeleteBy(int id)
+    public async Task<IRepositoryOperationStatus> DeleteBy(int id)
     {
-        throw new NotImplementedException();
+        var application = await dataContext.Applications.FindAsync(id);
+
+        if (application is null) return new NotExist<Application>();
+
+        await using var transaction = await dataContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
+
+        dataContext.Applications.Remove(application);
+        IRepositoryOperationStatus transactionStatus = await dataContext.TrySaveContext()
+            ? new Success()
+            : new UnexpectedError();
+
+        transaction.CompleteWithStatus(transactionStatus);
+        return transactionStatus;
     }
 
     private async Task<(User?, ConcreteGrade?, ConcretePump?)> GetForeignEntities(Application model)
