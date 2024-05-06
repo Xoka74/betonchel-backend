@@ -1,10 +1,12 @@
-﻿using Betonchel.Api.Utils;
+﻿using System.IdentityModel.Tokens.Jwt;
+using Betonchel.Api.Utils;
 using Betonchel.Data.Repositories;
 using Betonchel.Domain.BaseModels;
 using Betonchel.Domain.DBModels;
 using Betonchel.Domain.Filters;
 using Betonchel.Domain.JsonModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Betonchel.Api.Controllers;
 
@@ -12,12 +14,18 @@ namespace Betonchel.Api.Controllers;
 [ApiController]
 public class ApplicationController : ControllerBase
 {
-    private readonly IFilterableRepository<Application, int> repository;
+    private readonly IFilterableRepository<Application, int> _applicationRepository;
+    private readonly IFilterableRepository<User, int> _userRepository;
+    private static readonly JwtSecurityTokenHandler _jwtSecurityTokenHandler = new();
     private readonly string checkUrl;
 
-    public ApplicationController(ApplicationRepository repository, CheckUrl checkUrl)
+    public ApplicationController(
+        ApplicationRepository applicationRepository,
+        CheckUrl checkUrl,
+        IFilterableRepository<User, int> userRepository)
     {
-        this.repository = repository;
+        _applicationRepository = applicationRepository;
+        _userRepository = userRepository;
         this.checkUrl = checkUrl.Value;
     }
 
@@ -28,7 +36,7 @@ public class ApplicationController : ControllerBase
         if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
             return Unauthorized();
 
-        var applications = repository.GetAll(
+        var applications = _applicationRepository.GetAll(
             new ApplicationDateFilter(date),
             new ApplicationStatusFilter(status)
         );
@@ -43,8 +51,8 @@ public class ApplicationController : ControllerBase
         var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
         if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
             return Unauthorized();
-        
-        var application = repository.GetBy(id);
+
+        var application = _applicationRepository.GetBy(id);
         return application is null ? NotFound() : Ok(application);
     }
 
@@ -55,10 +63,27 @@ public class ApplicationController : ControllerBase
         var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
         if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
             return Unauthorized();
+        
+        // TODO: Refactor repeated code
+        var decodedToken = _jwtSecurityTokenHandler.ReadToken(accessToken) as JwtSecurityToken;
+
+        var email = decodedToken?.Claims.First(claim => claim.Type == "email");
+
+        if (email == null)
+        {
+            return Unauthorized();
+        }
+
+        var user = await _userRepository.GetAll().FirstOrDefaultAsync(x => x.Email == email.Value);
+
+        if (user == null)
+        {
+            return Unauthorized();
+        }
 
         if (!ModelState.IsValid) return BadRequest(ModelState.ValidationState);
 
-        var status = await repository.Create(userApplication.ToApplication());
+        var status = await _applicationRepository.Create(userApplication.ToApplication(user.Id));
 
         return status is SuccessOperationStatus
             ? Ok(status)
@@ -75,7 +100,7 @@ public class ApplicationController : ControllerBase
 
         if (!ModelState.IsValid) return BadRequest(ModelState.ValidationState);
 
-        var status = await repository.Update(userApplication.ToApplication(id));
+        var status = await _applicationRepository.Update(userApplication.ToApplication(id));
 
         return status is SuccessOperationStatus
             ? Ok(status)
