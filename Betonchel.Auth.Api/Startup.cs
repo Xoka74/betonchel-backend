@@ -20,6 +20,16 @@ public class Startup
     {
         services.AddDbContext<UserContext>(options => options.UseNpgsql(_configuration.GetConnectionString("ConnStr")));
 
+        services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy.AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowAnyOrigin();
+            });
+        });
+        
         services.AddIdentity<ApplicationUser, IdentityRole>()
             .AddEntityFrameworkStores<UserContext>()
             .AddDefaultTokenProviders();
@@ -57,6 +67,7 @@ public class Startup
     {
         app.UseHttpsRedirection();
 
+        app.UseCors();
         app.UseRouting();
 
         app.UseAuthentication();

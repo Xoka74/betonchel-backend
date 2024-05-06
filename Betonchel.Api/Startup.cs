@@ -23,7 +23,17 @@ public class Startup
     {
         services.AddDbContext<BetonchelContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
-
+        
+        services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy.AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowAnyOrigin();
+            });
+        });
+        
         AddRepositories(services);
         AddUrls(services, configuration);
 
@@ -43,6 +53,7 @@ public class Startup
             app.UseDeveloperExceptionPage();
         }
 
+        app.UseCors();
         app.UseRouting();
 
         app.UseEndpoints(endpoints => endpoints.MapControllers());
