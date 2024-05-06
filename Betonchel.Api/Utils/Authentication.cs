@@ -1,5 +1,4 @@
-﻿using System.Net.Http.Headers;
-using System.Text;
+﻿using System.Text;
 using Newtonsoft.Json;
 using Betonchel.Domain.JsonModels;
 
@@ -7,20 +6,16 @@ namespace Betonchel.Api.Utils;
 
 public static class Authentication
 {
-    private static readonly HttpClient Client;
-
-    static Authentication()
-    {
-        Client = new HttpClient();
-    }
-
     public static async Task<bool> CheckByAccessToken(string accessToken, string checkUrl)
     {
         try
         {
-            var content = new StringContent("", Encoding.UTF8, "application/json");
-            Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-            var response = await Client.PostAsync(checkUrl, content);
+            using var client = new HttpClient();
+            var request = new HttpRequestMessage(HttpMethod.Post, checkUrl);
+            
+            request.Headers.Add("Authorization", $"Bearer {accessToken}");
+
+            using var response = await client.SendAsync(request);
             return response.IsSuccessStatusCode;
         }
         catch (Exception)
@@ -29,17 +24,21 @@ public static class Authentication
         }
     }
 
+
+    
     public static async Task<bool> Register(string registerUrl, RegisterUser user, string accessToken)
     {
         try
         {
-            Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-            var content = new StringContent(
-                JsonConvert.SerializeObject(new { Email = user.Email, Password = user.Password }),
-                Encoding.UTF8,
-                "application/json"
-            );
-            var response = await Client.PostAsync(registerUrl, content);
+            using var client = new HttpClient();
+            var json = JsonConvert.SerializeObject(new  { Email = user.Email, Password = user.Password });
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var request = new HttpRequestMessage(HttpMethod.Post, registerUrl);
+    
+            request.Headers.Add("Authorization", $"Bearer {accessToken}");
+            request.Content = content;
+        
+            using var response = await client.SendAsync(request);
             return response.IsSuccessStatusCode;
         }
         catch (Exception)
@@ -47,4 +46,5 @@ public static class Authentication
             return false;
         }
     }
+
 }
