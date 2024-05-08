@@ -44,14 +44,10 @@ public class AuthenticateController : ControllerBase
         var userRoles = await _userManager.GetRolesAsync(user);
         var authClaims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, user.UserName),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new(JwtRegisteredClaimNames.Email, user.Email)
         };
 
-        foreach (var userRole in userRoles)
-        {
-            authClaims.Add(new Claim(ClaimTypes.Role, userRole));
-        }
+        authClaims.AddRange(userRoles.Select(userRole => new Claim("role", userRole)));
 
         var token = CreateToken(authClaims);
         var refreshToken = GenerateRefreshToken();
