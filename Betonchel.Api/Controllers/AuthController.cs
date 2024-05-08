@@ -24,8 +24,8 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Register([FromBody] RegisterUser model)
     {
         var accessToken = Request.Headers["Authorization"].ToString();
-        var isCreated = await Authentication.Register(registerUrl, model, accessToken);
-        if (!isCreated) return BadRequest();
+        var message = await Authentication.TryRegister(registerUrl, model, accessToken);
+        if (message is not null) return BadRequest(message);
         var status = await repository.Create(model.ToUser());
         return Ok(status);
     }

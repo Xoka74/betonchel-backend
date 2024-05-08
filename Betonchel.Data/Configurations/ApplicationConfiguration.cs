@@ -39,7 +39,6 @@ internal class ApplicationConfiguration : IEntityTypeConfiguration<Application>
         builder.Property(a => a.DeliveryDate)
             .HasColumnType("timestamp")
             .IsRequired();
-        builder.HasCheckConstraint("CK_DeliveryDate", "\"DeliveryDate\" > now()");
 
         builder.Property(a => a.Status)
             .HasDefaultValue(ApplicationStatus.Created)
