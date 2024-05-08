@@ -6,6 +6,10 @@ namespace Betonchel.Domain.JsonModels;
 public class UserConcreteGrade
 {
     [Required]
+    [Range(0, 1, ErrorMessage = "NotExist")]
+    public ConcreteGradeAttribute Name { get; set; }
+
+    [Required]
     [StringLength(10, ErrorMessage = "TooLong")]
     [StringStartsWith("M", ErrorMessage = "ShouldStartWithM")]
     public string Mark { get; set; }
@@ -35,6 +39,7 @@ public class UserConcreteGrade
         return new ConcreteGrade
         {
             Id = id,
+            Name = Name,
             Mark = Mark,
             Class = Class,
             FrostResistanceType = FrostResistanceType,

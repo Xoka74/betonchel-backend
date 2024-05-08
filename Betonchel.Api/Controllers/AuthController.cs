@@ -10,13 +10,13 @@ namespace Betonchel.Api.Controllers;
 [ApiController]
 public class AuthController : ControllerBase
 {
-    private readonly IFilterableRepository<User, int> repository;
-    private readonly string registerUrl;
+    private readonly IFilterableRepository<User, int> _repository;
+    private readonly Authentication _authentication;
 
-    public AuthController(IFilterableRepository<User, int> repository, RegisterUrl registerUrl)
+    public AuthController(IFilterableRepository<User, int> repository, Authentication authentication)
     {
-        this.repository = repository;
-        this.registerUrl = registerUrl.Value;
+        _repository = repository;
+        _authentication = authentication;
     }
 
     [HttpPost]
@@ -24,9 +24,9 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Register([FromBody] RegisterUser model)
     {
         var accessToken = Request.Headers["Authorization"].ToString();
-        var message = await Authentication.TryRegister(registerUrl, model, accessToken);
+        var message = await _authentication.TryRegister(model, accessToken);
         if (message is not null) return BadRequest(message);
-        var status = await repository.Create(model.ToUser());
+        var status = await _repository.Create(model.ToUser());
         return Ok(status);
     }
 }

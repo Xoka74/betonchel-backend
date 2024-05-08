@@ -11,23 +11,23 @@ namespace Betonchel.Api.Controllers;
 [ApiController]
 public class ConcreteGradeController : ControllerBase
 {
-    private readonly IFilterableRepository<ConcreteGrade, int> repository;
-    private readonly string checkUrl;
+    private readonly IFilterableRepository<ConcreteGrade, int> _repository;
+    private readonly Authentication _authentication;
 
-    public ConcreteGradeController(IFilterableRepository<ConcreteGrade, int> repository, CheckUrl checkUrl)
+    public ConcreteGradeController(IFilterableRepository<ConcreteGrade, int> repository, Authentication authentication)
     {
-        this.repository = repository;
-        this.checkUrl = checkUrl.Value;
+        this._repository = repository;
+        _authentication = authentication;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
         var accessToken = Request.Headers["Authorization"].ToString();
-        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
+        if (accessToken is null || !await _authentication.CheckByAccessToken(accessToken))
             return Unauthorized();
 
-        var concreteGrades = await repository.GetAll().ToListAsync();
+        var concreteGrades = await _repository.GetAll().ToListAsync();
         return Ok(concreteGrades);
     }
 
@@ -36,10 +36,10 @@ public class ConcreteGradeController : ControllerBase
     public async Task<IActionResult> GetById(int id)
     {
         var accessToken = Request.Headers["Authorization"].ToString();
-        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
+        if (accessToken is null || !await _authentication.CheckByAccessToken(accessToken))
             return Unauthorized();
 
-        var concreteGrade = repository.GetBy(id);
+        var concreteGrade = _repository.GetBy(id);
         return concreteGrade is null ? NotFound() : Ok(concreteGrade);
     }
 
@@ -48,12 +48,12 @@ public class ConcreteGradeController : ControllerBase
     public async Task<IActionResult> Create([FromBody] UserConcreteGrade userConcreteGrade)
     {
         var accessToken = Request.Headers["Authorization"].ToString();
-        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
+        if (accessToken is null || !await _authentication.CheckByAccessToken(accessToken))
             return Unauthorized();
 
         if (!ModelState.IsValid) return BadRequest(ModelState.ValidationState);
 
-        var status = await repository.Create(userConcreteGrade.ToConcreteGrade());
+        var status = await _repository.Create(userConcreteGrade.ToConcreteGrade());
 
         return status is SuccessOperationStatus
             ? Ok(status)
@@ -65,12 +65,12 @@ public class ConcreteGradeController : ControllerBase
     public async Task<IActionResult> Edit(int id, [FromBody] UserConcreteGrade userConcreteGrade)
     {
         var accessToken = Request.Headers["Authorization"].ToString();
-        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
+        if (accessToken is null || !await _authentication.CheckByAccessToken(accessToken))
             return Unauthorized();
 
         if (!ModelState.IsValid) return BadRequest(ModelState.ValidationState);
 
-        var status = await repository.Update(userConcreteGrade.ToConcreteGrade(id));
+        var status = await _repository.Update(userConcreteGrade.ToConcreteGrade(id));
 
         return status is SuccessOperationStatus
             ? Ok(status)
@@ -82,10 +82,10 @@ public class ConcreteGradeController : ControllerBase
     public async Task<IActionResult> Delete(int id)
     {
         var accessToken = Request.Headers["Authorization"].ToString();
-        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
+        if (accessToken is null || !await _authentication.CheckByAccessToken(accessToken))
             return Unauthorized();
 
-        var status = await repository.DeleteBy(id);
+        var status = await _repository.DeleteBy(id);
 
         return status is SuccessOperationStatus
             ? Ok(status)

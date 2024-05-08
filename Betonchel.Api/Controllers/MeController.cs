@@ -11,34 +11,33 @@ namespace Betonchel.Api.Controllers;
 [ApiController]
 public class MeController : ControllerBase
 {
-    private readonly IFilterableRepository<User, int> repository;
-    private readonly string checkUrl;
+    private readonly IFilterableRepository<User, int> _repository;
     private static readonly JwtSecurityTokenHandler _jwtSecurityTokenHandler = new();
+    private readonly Authentication _authentication;
 
-    public MeController(IFilterableRepository<User, int> repository, CheckUrl checkUrl)
+    public MeController(IFilterableRepository<User, int> repository, Authentication authentication)
     {
-        this.repository = repository;
-        this.checkUrl = checkUrl.Value;
+        _repository = repository;
+        _authentication = authentication;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetMe()
     {
-        var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
-        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
+        var accessToken = Request.Headers["Authorization"].ToString();
+        if (accessToken is null || !await _authentication.CheckByAccessToken(accessToken))
             return Unauthorized();
-
-
-        var decodedToken = _jwtSecurityTokenHandler.ReadToken(accessToken) as JwtSecurityToken;
         
+        var decodedToken = _jwtSecurityTokenHandler.ReadToken(accessToken.Replace("Bearer ", "")) as JwtSecurityToken;
+
         var email = decodedToken?.Claims.First(claim => claim.Type == "email");
-        
+
         if (email == null)
         {
             return Unauthorized();
         }
-        
-        var user = await repository.GetAll().FirstOrDefaultAsync(x => x.Email == email.Value);
+
+        var user = await _repository.GetAll().FirstOrDefaultAsync(x => x.Email == email.Value);
 
         return user != null ? Ok(user) : NotFound();
     }

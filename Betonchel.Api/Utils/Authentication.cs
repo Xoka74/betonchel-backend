@@ -4,14 +4,22 @@ using Betonchel.Domain.JsonModels;
 
 namespace Betonchel.Api.Utils;
 
-public static class Authentication
+public class Authentication
 {
-    public static async Task<bool> CheckByAccessToken(string? accessToken, string checkUrl) =>
+    private readonly string checkUrl;
+    private readonly string registerUrl;
+    
+    public Authentication(string checkUrl, string registerUrl)
+    {
+        this.registerUrl = registerUrl;
+        this.checkUrl = checkUrl;
+    }
+    
+    public async Task<bool> CheckByAccessToken(string? accessToken) =>
         await SendRequest(checkUrl, accessToken) is null;
 
 
-    public static async Task<string?> TryRegister(string registerUrl, RegisterUser user,
-        string? accessToken)
+    public async Task<string?> TryRegister(RegisterUser user, string? accessToken)
     {
         var json = JsonConvert.SerializeObject(new { Email = user.Email, Password = user.Password });
         var content = new StringContent(json, Encoding.UTF8, "application/json");

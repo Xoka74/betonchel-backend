@@ -17,23 +17,24 @@ public class ApplicationController : ControllerBase
     private readonly IFilterableRepository<Application, int> _applicationRepository;
     private readonly IFilterableRepository<User, int> _userRepository;
     private static readonly JwtSecurityTokenHandler _jwtSecurityTokenHandler = new();
-    private readonly string checkUrl;
+    private readonly Authentication _authentication;
 
     public ApplicationController(
         ApplicationRepository applicationRepository,
-        CheckUrl checkUrl,
-        IFilterableRepository<User, int> userRepository)
+        Authentication authentication,
+        IFilterableRepository<User, int> userRepository
+    )
     {
         _applicationRepository = applicationRepository;
+        _authentication = authentication;
         _userRepository = userRepository;
-        this.checkUrl = checkUrl.Value;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] ApplicationStatus? status, [FromQuery] DateTime? date)
     {
         var accessToken = Request.Headers["Authorization"].ToString();
-        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
+        if (accessToken is null || !await _authentication.CheckByAccessToken(accessToken))
             return Unauthorized();
 
         var applications = _applicationRepository.GetAll(
@@ -49,7 +50,7 @@ public class ApplicationController : ControllerBase
     public async Task<IActionResult> GetById(int id)
     {
         var accessToken = Request.Headers["Authorization"].ToString();
-        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
+        if (accessToken is null || !await _authentication.CheckByAccessToken(accessToken))
             return Unauthorized();
 
         var application = _applicationRepository.GetBy(id);
@@ -61,11 +62,11 @@ public class ApplicationController : ControllerBase
     public async Task<IActionResult> Create([FromBody] UserApplication userApplication)
     {
         var accessToken = Request.Headers["Authorization"].ToString();
-        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
+        if (accessToken is null || !await _authentication.CheckByAccessToken(accessToken))
             return Unauthorized();
-        
+
         // TODO: Refactor repeated code
-        var decodedToken = _jwtSecurityTokenHandler.ReadToken(accessToken) as JwtSecurityToken;
+        var decodedToken = _jwtSecurityTokenHandler.ReadToken(accessToken.Replace("Bearer ", "")) as JwtSecurityToken;
 
         var email = decodedToken?.Claims.First(claim => claim.Type == "email");
 
@@ -83,7 +84,7 @@ public class ApplicationController : ControllerBase
 
         if (!ModelState.IsValid) return BadRequest(ModelState.ValidationState);
 
-        var status = await _applicationRepository.Create(userApplication.ToApplication(user.Id));
+        var status = await _applicationRepository.Create(userApplication.ToApplication());
 
         return status is SuccessOperationStatus
             ? Ok(status)
@@ -95,7 +96,7 @@ public class ApplicationController : ControllerBase
     public async Task<IActionResult> Edit(int id, [FromBody] UserApplication userApplication)
     {
         var accessToken = Request.Headers["Authorization"].ToString();
-        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
+        if (accessToken is null || !await _authentication.CheckByAccessToken(accessToken))
             return Unauthorized();
 
         if (!ModelState.IsValid) return BadRequest(ModelState.ValidationState);
@@ -112,12 +113,12 @@ public class ApplicationController : ControllerBase
     public async Task<IActionResult> Delete(int id)
     {
         var accessToken = Request.Headers["Authorization"].ToString();
-        if (accessToken is null || !await Authentication.CheckByAccessToken(accessToken, checkUrl))
+        if (accessToken is null || !await _authentication.CheckByAccessToken(accessToken))
             return Unauthorized();
-        
+
         var status = await _applicationRepository.DeleteBy(id);
         return status is SuccessOperationStatus
             ? Ok(status)
-            : BadRequest(status); 
+            : BadRequest(status);
     }
 }
