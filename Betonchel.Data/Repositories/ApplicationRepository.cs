@@ -10,16 +10,16 @@ namespace Betonchel.Data.Repositories;
 
 public class ApplicationRepository : IFilterableRepository<Application, int>
 {
-    private readonly BetonchelContext dataContext;
+    private readonly BetonchelContext _dataContext;
 
     public ApplicationRepository(BetonchelContext dataContext)
     {
-        this.dataContext = dataContext;
+        this._dataContext = dataContext;
     }
 
     public IQueryable<Application> GetAll()
     {
-        return dataContext.Applications
+        return _dataContext.Applications
             .Include(ap => ap.ConcreteGrade)
             .Include(ap => ap.ConcretePump)
             .Include(ap => ap.User);
@@ -32,7 +32,7 @@ public class ApplicationRepository : IFilterableRepository<Application, int>
 
     public async Task<IRepositoryOperationStatus> Create(Application model)
     {
-        await using var transaction = await dataContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
+        await using var transaction = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
 
         var (user, concreteGrade, concretePump) = await GetForeignEntities(model);
 
@@ -47,7 +47,7 @@ public class ApplicationRepository : IFilterableRepository<Application, int>
         model.ConcreteGrade = concreteGrade;
         model.ConcretePump = concretePump;
 
-        IRepositoryOperationStatus transactionStatus = await dataContext.TrySaveEntity(model)
+        IRepositoryOperationStatus transactionStatus = await _dataContext.TrySaveEntity(model)
             ? new Success()
             : new UnexpectedError();
         transaction.CompleteWithStatus(transactionStatus);
@@ -60,7 +60,7 @@ public class ApplicationRepository : IFilterableRepository<Application, int>
 
         if (toUpdate is null) return new NotExist<Application>();
 
-        await using var transaction = await dataContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
+        await using var transaction = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
 
         var (user, concreteGrade, concretePump) = await GetForeignEntities(model);
 
@@ -83,7 +83,7 @@ public class ApplicationRepository : IFilterableRepository<Application, int>
         toUpdate.Description = model.Description;
         toUpdate.Status = model.Status;
 
-        IRepositoryOperationStatus transactionStatus = await dataContext.TrySaveContext()
+        IRepositoryOperationStatus transactionStatus = await _dataContext.TrySaveContext()
             ? new Success()
             : new UnexpectedError();
         transaction.CompleteWithStatus(transactionStatus);
@@ -92,14 +92,14 @@ public class ApplicationRepository : IFilterableRepository<Application, int>
 
     public async Task<IRepositoryOperationStatus> DeleteBy(int id)
     {
-        var application = await dataContext.Applications.FindAsync(id);
+        var application = await _dataContext.Applications.FindAsync(id);
 
         if (application is null) return new NotExist<Application>();
 
-        await using var transaction = await dataContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
+        await using var transaction = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
 
-        dataContext.Applications.Remove(application);
-        IRepositoryOperationStatus transactionStatus = await dataContext.TrySaveContext()
+        _dataContext.Applications.Remove(application);
+        IRepositoryOperationStatus transactionStatus = await _dataContext.TrySaveContext()
             ? new Success()
             : new UnexpectedError();
 
@@ -109,11 +109,11 @@ public class ApplicationRepository : IFilterableRepository<Application, int>
 
     private async Task<(User?, ConcreteGrade?, ConcretePump?)> GetForeignEntities(Application model)
     {
-        var user = await dataContext.Users.SingleOrDefaultAsync(cg => cg.Id == model.UserId);
-        var concreteGrade = await dataContext.ConcreteGrades
+        var user = await _dataContext.Users.SingleOrDefaultAsync(cg => cg.Id == model.UserId);
+        var concreteGrade = await _dataContext.ConcreteGrades
             .SingleOrDefaultAsync(cg => cg.Id == model.ConcreteGradeId);
         var concretePump = model.ConcretePumpId is not null
-            ? await dataContext.ConcretePumps.SingleOrDefaultAsync(pump => pump.Id == model.ConcretePumpId)
+            ? await _dataContext.ConcretePumps.SingleOrDefaultAsync(pump => pump.Id == model.ConcretePumpId)
             : null;
         return (user, concreteGrade, concretePump);
     }
