@@ -12,18 +12,18 @@ namespace Betonchel.Api;
 
 public class Startup
 {
-    private readonly IConfiguration configuration;
+    private readonly IConfiguration _configuration;
 
     public Startup(IConfiguration configuration)
     {
-        this.configuration = configuration;
+        _configuration = configuration;
     }
 
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddDbContext<BetonchelContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
-        
+            options.UseNpgsql(_configuration.GetConnectionString("DefaultConnection")));
+
         services.AddCors(options =>
         {
             options.AddDefaultPolicy(policy =>
@@ -33,9 +33,13 @@ public class Startup
                     .AllowAnyOrigin();
             });
         });
-        
+
         AddRepositories(services);
-        AddUrls(services, configuration);
+        services.AddScoped<Authentication>(_ => new Authentication(
+                _configuration["AuthServer:CheckUrl"],
+                _configuration["AuthServer:RegisterUrl"]
+            )
+        );
 
         services.AddControllers();
 
@@ -44,6 +48,8 @@ public class Startup
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Betonchel API", Version = "v1" });
             c.SchemaFilter<StartsWithSchemaFilter>();
         });
+        
+        services.AddScoped<DataSeeder>();
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -63,11 +69,6 @@ public class Startup
         app.UseSwaggerUI(c => { c.SwaggerEndpoint("v1/swagger.json", "Betonchel API V1"); });
     }
 
-    private static void AddUrls(IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddScoped<CheckUrl>(_ => new CheckUrl(configuration["AuthServer:CheckUrl"]));
-        services.AddScoped<RegisterUrl>(_ => new RegisterUrl(configuration["AuthServer:RegisterUrl"]));
-    }
 
     private static void AddRepositories(IServiceCollection services)
     {
