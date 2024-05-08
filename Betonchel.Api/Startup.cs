@@ -36,7 +36,7 @@ public class Startup
 
         AddRepositories(services);
         services.AddScoped<Authentication>(_ => new Authentication(
-                _configuration["AuthServer:CheckUrl"],
+                _configuration["AuthServer:ResolveUrl"],
                 _configuration["AuthServer:RegisterUrl"]
             )
         );

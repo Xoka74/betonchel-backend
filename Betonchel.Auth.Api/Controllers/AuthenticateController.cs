@@ -21,6 +21,7 @@ public class AuthenticateController : ControllerBase
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IConfiguration _configuration;
+    private static readonly JwtSecurityTokenHandler _jwtSecurityTokenHandler = new();
 
     public AuthenticateController(
         UserManager<ApplicationUser> userManager,
@@ -194,6 +195,17 @@ public class AuthenticateController : ControllerBase
     public async Task<IActionResult> Check()
     {
         return Ok(new Success());
+    }
+    
+    [HttpGet]
+    [Route("resolve")]
+    [Authorize]
+    public async Task<IActionResult> Resolve()
+    {
+        var accessToken = Request.Headers["Authorization"].ToString()?.Replace("Bearer ", "");
+        var decodedToken = _jwtSecurityTokenHandler.ReadToken(accessToken) as JwtSecurityToken;
+        var email = decodedToken?.Claims.First(claim => claim.Type == "email").Value;
+        return Ok(new ResolveSuccess(email));
     }
 
 

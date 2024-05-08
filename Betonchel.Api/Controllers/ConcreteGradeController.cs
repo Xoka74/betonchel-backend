@@ -51,8 +51,6 @@ public class ConcreteGradeController : ControllerBase
         if (accessToken is null || !await _authentication.CheckByAccessToken(accessToken))
             return Unauthorized();
 
-        if (!ModelState.IsValid) return BadRequest(ModelState.ValidationState);
-
         var status = await _repository.Create(userConcreteGrade.ToConcreteGrade());
 
         return status is SuccessOperationStatus
@@ -67,9 +65,7 @@ public class ConcreteGradeController : ControllerBase
         var accessToken = Request.Headers["Authorization"].ToString();
         if (accessToken is null || !await _authentication.CheckByAccessToken(accessToken))
             return Unauthorized();
-
-        if (!ModelState.IsValid) return BadRequest(ModelState.ValidationState);
-
+        
         var status = await _repository.Update(userConcreteGrade.ToConcreteGrade(id));
 
         return status is SuccessOperationStatus

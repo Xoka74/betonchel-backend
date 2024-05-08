@@ -1,5 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using Betonchel.Api.Utils;
+﻿using Betonchel.Api.Utils;
 using Betonchel.Data.Repositories;
 using Betonchel.Domain.BaseModels;
 using Betonchel.Domain.DBModels;
@@ -16,7 +15,6 @@ public class ApplicationController : ControllerBase
 {
     private readonly IFilterableRepository<Application, int> _applicationRepository;
     private readonly IFilterableRepository<User, int> _userRepository;
-    private static readonly JwtSecurityTokenHandler _jwtSecurityTokenHandler = new();
     private readonly Authentication _authentication;
 
     public ApplicationController(
@@ -62,27 +60,15 @@ public class ApplicationController : ControllerBase
     public async Task<IActionResult> Create([FromBody] UserApplication userApplication)
     {
         var accessToken = Request.Headers["Authorization"].ToString();
-        if (accessToken is null || !await _authentication.CheckByAccessToken(accessToken))
+        var email = await _authentication.ResolveBy(accessToken);
+
+        if (accessToken is null || email is null)
             return Unauthorized();
 
-        // TODO: Refactor repeated code
-        var decodedToken = _jwtSecurityTokenHandler.ReadToken(accessToken.Replace("Bearer ", "")) as JwtSecurityToken;
-
-        var email = decodedToken?.Claims.First(claim => claim.Type == "email");
-
-        if (email == null)
-        {
-            return Unauthorized();
-        }
-
-        var user = await _userRepository.GetAll().FirstOrDefaultAsync(x => x.Email == email.Value);
+        var user = await _userRepository.GetAll().FirstOrDefaultAsync(x => x.Email == email);
 
         if (user == null)
-        {
             return Unauthorized();
-        }
-
-        if (!ModelState.IsValid) return BadRequest(ModelState.ValidationState);
 
         var status = await _applicationRepository.Create(userApplication.ToApplication());
 
@@ -98,9 +84,7 @@ public class ApplicationController : ControllerBase
         var accessToken = Request.Headers["Authorization"].ToString();
         if (accessToken is null || !await _authentication.CheckByAccessToken(accessToken))
             return Unauthorized();
-
-        if (!ModelState.IsValid) return BadRequest(ModelState.ValidationState);
-
+        
         var status = await _applicationRepository.Update(userApplication.ToApplication(id));
 
         return status is SuccessOperationStatus
@@ -113,6 +97,7 @@ public class ApplicationController : ControllerBase
     public async Task<IActionResult> Delete(int id)
     {
         var accessToken = Request.Headers["Authorization"].ToString();
+
         if (accessToken is null || !await _authentication.CheckByAccessToken(accessToken))
             return Unauthorized();
 
