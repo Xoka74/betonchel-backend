@@ -35,7 +35,7 @@ public class Startup
                     .AllowAnyOrigin();
             });
         });
-        
+
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
@@ -50,11 +50,10 @@ public class Startup
                     ValidateIssuerSigningKey = true,
                 };
             });
-        
 
         AddRepositories(services);
-        AddUrls(services, configuration);
-
+        services.AddScoped<Authentication>(_ => new Authentication(configuration["AuthServer:RegisterUrl"]));
+        services.AddScoped<DataSeeder>();
         services.AddControllers();
 
         services.AddSwaggerGen(c =>
@@ -71,26 +70,16 @@ public class Startup
             app.UseDeveloperExceptionPage();
         }
 
-
         app.UseCors();
         app.UseRouting();
-
         app.UseAuthentication();
-
         app.UseAuthorization();
-
-
         app.UseEndpoints(endpoints => endpoints.MapControllers());
 
         app.UseSwagger();
-
         app.UseSwaggerUI(c => { c.SwaggerEndpoint("v1/swagger.json", "Betonchel API V1"); });
     }
 
-    private static void AddUrls(IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddScoped<RegisterUrl>(_ => new RegisterUrl(configuration["AuthServer:RegisterUrl"]));
-    }
 
     private static void AddRepositories(IServiceCollection services)
     {

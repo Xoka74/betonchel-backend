@@ -10,22 +10,22 @@ namespace Betonchel.Data.Repositories;
 
 public class ConcreteGradeRepository : IFilterableRepository<ConcreteGrade, int>
 {
-    private readonly BetonchelContext dataContext;
+    private readonly BetonchelContext _dataContext;
 
     public ConcreteGradeRepository(BetonchelContext dataContext)
     {
-        this.dataContext = dataContext;
+        _dataContext = dataContext;
     }
 
-    public IQueryable<ConcreteGrade> GetAll() => dataContext.ConcreteGrades;
+    public IQueryable<ConcreteGrade> GetAll() => _dataContext.ConcreteGrades;
 
     public ConcreteGrade? GetBy(int id) => GetAll().SingleOrDefault(cg => cg.Id == id);
 
     public async Task<IRepositoryOperationStatus> Create(ConcreteGrade model)
     {
-        await using var transaction = await dataContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
+        await using var transaction = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
 
-        IRepositoryOperationStatus transactionStatus = await dataContext.TrySaveEntity(model)
+        IRepositoryOperationStatus transactionStatus = await _dataContext.TrySaveEntity(model)
             ? new Success()
             : new UnexpectedError();
 
@@ -39,15 +39,16 @@ public class ConcreteGradeRepository : IFilterableRepository<ConcreteGrade, int>
 
         if (toUpdate == null) return new NotExist<ConcreteGrade>();
 
-        await using var transaction = await dataContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
+        await using var transaction = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
 
+        toUpdate.Name = model.Name;
         toUpdate.Mark = model.Mark;
         toUpdate.Class = model.Class;
         toUpdate.WaterproofType = model.WaterproofType;
         toUpdate.FrostResistanceType = model.FrostResistanceType;
         toUpdate.PricePerCubicMeter = model.PricePerCubicMeter;
 
-        IRepositoryOperationStatus transactionStatus = await dataContext.TrySaveContext()
+        IRepositoryOperationStatus transactionStatus = await _dataContext.TrySaveContext()
             ? new Success()
             : new UnexpectedError();
         transaction.CompleteWithStatus(transactionStatus);
@@ -56,14 +57,14 @@ public class ConcreteGradeRepository : IFilterableRepository<ConcreteGrade, int>
 
     public async Task<IRepositoryOperationStatus> DeleteBy(int id)
     {
-        var concreteGrade = await dataContext.ConcreteGrades.FindAsync(id);
+        var concreteGrade = await _dataContext.ConcreteGrades.FindAsync(id);
 
         if (concreteGrade is null) return new NotExist<ConcreteGrade>();
 
-        await using var transaction = await dataContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
+        await using var transaction = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
 
-        dataContext.ConcreteGrades.Remove(concreteGrade);
-        IRepositoryOperationStatus transactionStatus = await dataContext.TrySaveContext()
+        _dataContext.ConcreteGrades.Remove(concreteGrade);
+        IRepositoryOperationStatus transactionStatus = await _dataContext.TrySaveContext()
             ? new Success()
             : new RestrictRelation<Application, ConcreteGrade>();
         transaction.CompleteWithStatus(transactionStatus);

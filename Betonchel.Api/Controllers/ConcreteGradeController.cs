@@ -38,8 +38,6 @@ public class ConcreteGradeController : ControllerBase
     [Route("create")]
     public async Task<IActionResult> Create([FromBody] UserConcreteGrade userConcreteGrade)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState.ValidationState);
-
         var status = await repository.Create(userConcreteGrade.ToConcreteGrade());
 
         return status is SuccessOperationStatus
@@ -51,8 +49,6 @@ public class ConcreteGradeController : ControllerBase
     [Route("edit/{id:int}")]
     public async Task<IActionResult> Edit(int id, [FromBody] UserConcreteGrade userConcreteGrade)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState.ValidationState);
-
         var status = await repository.Update(userConcreteGrade.ToConcreteGrade(id));
 
         return status is SuccessOperationStatus

@@ -11,25 +11,25 @@ namespace Betonchel.Data.Repositories;
 
 public class UserRepository : IFilterableRepository<User, int>
 {
-    private readonly BetonchelContext dataContext;
+    private readonly BetonchelContext _dataContext;
 
     public UserRepository(BetonchelContext dataContext)
     {
-        this.dataContext = dataContext;
+        _dataContext = dataContext;
     }
 
-    public IQueryable<User> GetAll() => dataContext.Users;
+    public IQueryable<User> GetAll() => _dataContext.Users;
 
     public User? GetBy(int id) => GetAll().SingleOrDefault(user => user.Id == id);
 
     public async Task<IRepositoryOperationStatus> Create(User model)
     {
-        await using var transaction = await dataContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
+        await using var transaction = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
 
         if (!HasUserUniqueEmail(model))
             return new NotUnique<User>();
 
-        IRepositoryOperationStatus transactionStatus = await dataContext.TrySaveEntity(model)
+        IRepositoryOperationStatus transactionStatus = await _dataContext.TrySaveEntity(model)
             ? new Success()
             : new UnexpectedError();
 
@@ -50,21 +50,21 @@ public class UserRepository : IFilterableRepository<User, int>
         toUpdate.FullName = model.FullName;
         toUpdate.Email = model.Email;
 
-        return await dataContext.TrySaveContext()
+        return await _dataContext.TrySaveContext()
             ? new Success()
             : new UnexpectedError();
     }
 
     public async Task<IRepositoryOperationStatus> DeleteBy(int id)
     {
-        var user = await dataContext.Users.FindAsync(id);
+        var user = await _dataContext.Users.FindAsync(id);
 
         if (user is null) return new NotExist<User>();
 
-        await using var transaction = await dataContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
+        await using var transaction = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
 
-        dataContext.Users.Remove(user);
-        IRepositoryOperationStatus transactionStatus = await dataContext.TrySaveContext()
+        _dataContext.Users.Remove(user);
+        IRepositoryOperationStatus transactionStatus = await _dataContext.TrySaveContext()
             ? new Success()
             : new RestrictRelation<Application, User>();
         transaction.CompleteWithStatus(transactionStatus);

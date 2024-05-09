@@ -11,6 +11,10 @@ public class UserApplication
 
     [Required]
     [Range(1, int.MaxValue, ErrorMessage = "OutOfRange")]
+    public int UserId { get; set; }
+
+    [Required]
+    [Range(1, int.MaxValue, ErrorMessage = "OutOfRange")]
     public int ConcreteGradeId { get; set; }
 
     [Required]
@@ -39,12 +43,12 @@ public class UserApplication
     [Range(0, 4, ErrorMessage = "NotExisted")]
     public ApplicationStatus? Status { get; set; }
 
-    public Application ToApplication(int userId, int id = 0)
+    public Application ToApplication(int id = 0)
     {
         return new Application
         {
             Id = id,
-            UserId = userId,
+            UserId = UserId,
             CustomerName = CustomerName,
             ConcreteGradeId = ConcreteGradeId,
             TotalPrice = TotalPrice,

@@ -21,7 +21,7 @@ public class AuthenticateController : ControllerBase
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IConfiguration _configuration;
-    private readonly JwtSecurityTokenHandler _tokenHandler = new JwtSecurityTokenHandler();
+    private readonly JwtSecurityTokenHandler _tokenHandler = new();
 
     public AuthenticateController(
         UserManager<ApplicationUser> userManager,

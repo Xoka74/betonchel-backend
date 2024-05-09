@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Betonchel.Data.Repositories;
 using Betonchel.Domain.BaseModels;
 using Betonchel.Domain.DBModels;
@@ -65,9 +65,7 @@ public class ApplicationController : ControllerBase
             return Unauthorized();
         }
 
-        if (!ModelState.IsValid) return BadRequest(ModelState.ValidationState);
-
-        var status = await _applicationRepository.Create(userApplication.ToApplication(user.Id));
+        var status = await _applicationRepository.Create(userApplication.ToApplication());
 
         return status is SuccessOperationStatus
             ? Ok(status)
@@ -78,8 +76,6 @@ public class ApplicationController : ControllerBase
     [Route("edit/{id:int}")]
     public async Task<IActionResult> Edit(int id, [FromBody] UserApplication userApplication)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState.ValidationState);
-
         var status = await _applicationRepository.Update(userApplication.ToApplication(id));
 
         return status is SuccessOperationStatus
@@ -94,6 +90,6 @@ public class ApplicationController : ControllerBase
         var status = await _applicationRepository.DeleteBy(id);
         return status is SuccessOperationStatus
             ? Ok(status)
-            : BadRequest(status);
+            : BadRequest(status); 
     }
 }
