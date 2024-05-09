@@ -7,30 +7,11 @@ namespace Betonchel.Api.Utils;
 
 public class Authentication
 {
-    private readonly string _resolveUrl;
     private readonly string _registerUrl;
 
-    public Authentication(string resolveUrl, string registerUrl)
+    public Authentication(string registerUrl)
     {
-        _resolveUrl = resolveUrl;
         _registerUrl = registerUrl;
-    }
-
-    public async Task<bool> CheckByAccessToken(string? accessToken)
-    {
-        using var response = await SendRequest(_resolveUrl, HttpMethod.Get, accessToken);
-        return response.IsSuccessStatusCode;
-    }
-
-    public async Task<string?> ResolveBy(string? accessToken)
-    {
-        using var response = await SendRequest(_resolveUrl, HttpMethod.Get, accessToken);
-        return response.IsSuccessStatusCode
-            ? JsonConvert.DeserializeAnonymousType(
-                await response.Content.ReadAsStringAsync(),
-                new { Email = "" }
-            )?.Email
-            : null;
     }
 
 

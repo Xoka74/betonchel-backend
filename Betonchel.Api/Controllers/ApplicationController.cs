@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using Betonchel.Api.Utils;
 using Betonchel.Data.Repositories;
 using Betonchel.Domain.BaseModels;
 using Betonchel.Domain.DBModels;
@@ -18,15 +17,12 @@ public class ApplicationController : ControllerBase
 {
     private readonly IFilterableRepository<Application, int> _applicationRepository;
     private readonly IFilterableRepository<User, int> _userRepository;
-    private readonly Authentication _authentication;
 
     public ApplicationController(
         ApplicationRepository applicationRepository,
-        IFilterableRepository<User, int> userRepository,
-        Authentication authentication)
+        IFilterableRepository<User, int> userRepository)
     {
         _applicationRepository = applicationRepository;
-        _authentication = authentication;
         _userRepository = userRepository;
     }
 
@@ -54,7 +50,7 @@ public class ApplicationController : ControllerBase
     public async Task<IActionResult> Create([FromBody] UserApplication userApplication)
     {
         var email = HttpContext.User.FindFirstValue("email");
-        
+
         if (email == null)
         {
             return Unauthorized();
