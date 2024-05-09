@@ -1,40 +1,63 @@
-﻿using System.Text;
+﻿using System.Net;
+using System.Text;
 using Newtonsoft.Json;
 using Betonchel.Domain.JsonModels;
 
 namespace Betonchel.Api.Utils;
 
-public static class Authentication
+public class Authentication
 {
-    public static async Task<bool> CheckByAccessToken(string? accessToken, string checkUrl) =>
-        await SendRequest(checkUrl, accessToken) is null;
+    private readonly string _resolveUrl;
+    private readonly string _registerUrl;
 
-
-    public static async Task<string?> TryRegister(string registerUrl, RegisterUser user,
-        string? accessToken)
+    public Authentication(string resolveUrl, string registerUrl)
     {
-        var json = JsonConvert.SerializeObject(new { Email = user.Email, Password = user.Password });
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-        return await SendRequest(registerUrl, accessToken, content);
+        _resolveUrl = resolveUrl;
+        _registerUrl = registerUrl;
     }
 
-    private static async Task<string?> SendRequest(string url, string? accessToken,
+    public async Task<bool> CheckByAccessToken(string? accessToken)
+    {
+        using var response = await SendRequest(_resolveUrl, HttpMethod.Get, accessToken);
+        return response.IsSuccessStatusCode;
+    }
+
+    public async Task<string?> ResolveBy(string? accessToken)
+    {
+        using var response = await SendRequest(_resolveUrl, HttpMethod.Get, accessToken);
+        return response.IsSuccessStatusCode
+            ? JsonConvert.DeserializeAnonymousType(
+                await response.Content.ReadAsStringAsync(),
+                new { Email = "" }
+            )?.Email
+            : null;
+    }
+
+
+    public async Task<string?> TryRegister(RegisterUser user, string? accessToken)
+    {
+        var json = JsonConvert.SerializeObject(new { user.Email, user.Password });
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        using var response = await SendRequest(_registerUrl, HttpMethod.Post, accessToken, content);
+        return !response.IsSuccessStatusCode
+            ? await response.Content.ReadAsStringAsync()
+            : null;
+    }
+
+    private static async Task<HttpResponseMessage> SendRequest(string url, HttpMethod method, string? accessToken,
         HttpContent? content = null)
     {
         try
         {
             using var client = new HttpClient();
-            var request = new HttpRequestMessage(HttpMethod.Post, url);
+            var request = new HttpRequestMessage(method, url);
             request.Headers.Add("Authorization", accessToken);
             request.Content = content;
-            using var response = await client.SendAsync(request);
-            return !response.IsSuccessStatusCode
-                ? await response.Content.ReadAsStringAsync()
-                : null;
+            return await client.SendAsync(request);
         }
         catch (Exception)
         {
-            return "Unexpected error";
+            return new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
         }
     }
 }

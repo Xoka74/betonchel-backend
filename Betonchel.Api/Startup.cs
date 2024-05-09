@@ -53,8 +53,12 @@ public class Startup
         
 
         AddRepositories(services);
-        AddUrls(services, configuration);
 
+        services.AddScoped<Authentication>(_ => new Authentication(
+                configuration["AuthServer:ResolveUrl"],
+                configuration["AuthServer:RegisterUrl"]
+            )
+        );
         services.AddControllers();
 
         services.AddSwaggerGen(c =>
@@ -62,6 +66,8 @@ public class Startup
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Betonchel API", Version = "v1" });
             c.SchemaFilter<StartsWithSchemaFilter>();
         });
+        
+        services.AddScoped<DataSeeder>();
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -87,10 +93,6 @@ public class Startup
         app.UseSwaggerUI(c => { c.SwaggerEndpoint("v1/swagger.json", "Betonchel API V1"); });
     }
 
-    private static void AddUrls(IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddScoped<RegisterUrl>(_ => new RegisterUrl(configuration["AuthServer:RegisterUrl"]));
-    }
 
     private static void AddRepositories(IServiceCollection services)
     {

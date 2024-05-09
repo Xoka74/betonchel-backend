@@ -10,22 +10,22 @@ namespace Betonchel.Data.Repositories;
 
 public class ConcretePumpRepository : IBaseRepository<ConcretePump, int>
 {
-    private readonly BetonchelContext dataContext;
+    private readonly BetonchelContext _dataContext;
 
     public ConcretePumpRepository(BetonchelContext dataContext)
     {
-        this.dataContext = dataContext;
+        this._dataContext = dataContext;
     }
 
-    public IQueryable<ConcretePump> GetAll() => dataContext.ConcretePumps;
+    public IQueryable<ConcretePump> GetAll() => _dataContext.ConcretePumps;
 
     public ConcretePump? GetBy(int id) => GetAll().SingleOrDefault(pump => pump.Id == id);
 
     public async Task<IRepositoryOperationStatus> Create(ConcretePump model)
     {
-        await using var transaction = await dataContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
+        await using var transaction = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
 
-        IRepositoryOperationStatus transactionStatus = await dataContext.TrySaveEntity(model)
+        IRepositoryOperationStatus transactionStatus = await _dataContext.TrySaveEntity(model)
             ? new Success()
             : new UnexpectedError();
         transaction.CompleteWithStatus(transactionStatus);
@@ -42,21 +42,21 @@ public class ConcretePumpRepository : IBaseRepository<ConcretePump, int>
         toUpdate.PipeLength = model.PipeLength;
         toUpdate.PricePerHour = model.PricePerHour;
 
-        return await dataContext.TrySaveContext()
+        return await _dataContext.TrySaveContext()
             ? new Success()
             : new UnexpectedError();
     }
 
     public async Task<IRepositoryOperationStatus> DeleteBy(int id)
     {
-        var concretePump = await dataContext.ConcretePumps.FindAsync(id);
+        var concretePump = await _dataContext.ConcretePumps.FindAsync(id);
 
         if (concretePump is null) return new NotExist<ConcretePump>();
 
-        await using var transaction = await dataContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
+        await using var transaction = await _dataContext.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
 
-        dataContext.ConcretePumps.Remove(concretePump);
-        IRepositoryOperationStatus transactionStatus = await dataContext.TrySaveContext()
+        _dataContext.ConcretePumps.Remove(concretePump);
+        IRepositoryOperationStatus transactionStatus = await _dataContext.TrySaveContext()
             ? new Success()
             : new RestrictRelation<Application, ConcretePump>();
         transaction.CompleteWithStatus(transactionStatus);

@@ -1,10 +1,18 @@
-﻿namespace Betonchel.Api;
+﻿using Betonchel.Api.Utils;
+
+namespace Betonchel.Api;
 
 public class Program
 {
     public static void Main(string[] args)
     {
         var host = CreateHostBuilder(args).Build();
+        using (var scope = host.Services.CreateScope())
+        {
+            var services = scope.ServiceProvider;
+            var dataSeeder = services.GetRequiredService<DataSeeder>();
+            dataSeeder.SeedDataAsync().Wait();
+        }
         host.Run();
     }
 
