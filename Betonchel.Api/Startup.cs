@@ -45,6 +45,7 @@ public class Startup
                     ValidateIssuer = false,
                     ValidateAudience = false,
                     ValidateLifetime = true,
+                    RequireExpirationTime = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("secretsecretsecretsecretsecretse")),
                     ValidateIssuerSigningKey = true,
                 };
