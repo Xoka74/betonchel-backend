@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Betonchel.Domain.CustomAttributes;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 

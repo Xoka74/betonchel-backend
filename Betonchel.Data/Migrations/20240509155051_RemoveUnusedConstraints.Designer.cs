@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Betonchel.Data.Migrations
 {
     [DbContext(typeof(BetonchelContext))]
-    [Migration("20240508142015_RemoveUnusedConstraints")]
+    [Migration("20240509155051_RemoveUnusedConstraints")]
     partial class RemoveUnusedConstraints
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -124,8 +124,7 @@ namespace Betonchel.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Mark", "Class")
-                        .IsUnique();
+                    b.HasIndex("Mark", "Class");
 
                     b.ToTable("ConcreteGrades");
 
