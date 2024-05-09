@@ -1,21 +1,22 @@
 ﻿using System.Net;
 using System.Text;
-using Newtonsoft.Json;
+using Betonchel.Domain.BaseModels;
 using Betonchel.Domain.JsonModels;
+using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 
-namespace Betonchel.Api.Utils;
+namespace Betonchel.Data.Repositories;
 
-public class Authentication
+public class ExternalAuthRepository : IBaseRepositoryWithAuth<RegisterUser, string?>
 {
     private readonly string _registerUrl;
 
-    public Authentication(string registerUrl)
+    public ExternalAuthRepository(IConfiguration configuration)
     {
-        _registerUrl = registerUrl;
+        _registerUrl = configuration["AuthServer:RegisterUrl"];
     }
 
-
-    public async Task<string?> TryRegister(RegisterUser user, string? accessToken)
+    public async Task<string?> Store(RegisterUser user, string? accessToken)
     {
         var json = JsonConvert.SerializeObject(new { user.Email, user.Password });
         var content = new StringContent(json, Encoding.UTF8, "application/json");

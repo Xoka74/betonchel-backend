@@ -122,8 +122,7 @@ namespace Betonchel.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Mark", "Class")
-                        .IsUnique();
+                    b.HasIndex("Mark", "Class");
 
                     b.ToTable("ConcreteGrades");
 

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Betonchel.Domain.CustomAttributes;
 using Betonchel.Domain.DBModels;
 
 namespace Betonchel.Domain.JsonModels;
@@ -19,15 +20,13 @@ public class UserConcreteGrade
     [StringStartsWith("B", ErrorMessage = "ShouldStartWithB")]
     public string Class { get; set; }
 
-    [Required]
     [StringLength(10, ErrorMessage = "TooLong")]
     [StringStartsWith("W", ErrorMessage = "ShouldStartWithW")]
-    public string WaterproofType { get; set; }
+    public string? WaterproofType { get; set; }
 
-    [Required]
     [StringLength(10, ErrorMessage = "TooLong")]
     [StringStartsWith("F", ErrorMessage = "ShouldStartWithF")]
-    public string FrostResistanceType { get; set; }
+    public string? FrostResistanceType { get; set; }
 
 
     [Required]

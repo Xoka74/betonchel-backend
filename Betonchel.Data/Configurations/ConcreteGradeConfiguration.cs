@@ -21,7 +21,7 @@ internal class ConcreteGradeConfiguration : IEntityTypeConfiguration<ConcreteGra
             .HasColumnType("varchar(10)")
             .IsRequired();
 
-        builder.HasIndex(cg => new { cg.Mark, cg.Class }).IsUnique();
+        builder.HasIndex(cg => new { cg.Mark, cg.Class });
 
         builder.Property(cg => cg.WaterproofType)
             .HasMaxLength(10);

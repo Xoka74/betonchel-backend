@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
+namespace Betonchel.Domain.CustomAttributes;
+
 public class StringStartsWithAttribute : ValidationAttribute
 {
     public string Prefix { get; }
@@ -10,5 +12,5 @@ public class StringStartsWithAttribute : ValidationAttribute
     }
 
     public override bool IsValid(object? value) => 
-        value is string strValue && strValue.StartsWith(Prefix);
+        value is null || (value is string strValue && strValue.StartsWith(Prefix));
 }

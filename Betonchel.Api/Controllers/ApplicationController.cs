@@ -4,11 +4,9 @@ using Betonchel.Domain.BaseModels;
 using Betonchel.Domain.DBModels;
 using Betonchel.Domain.Filters;
 using Betonchel.Domain.JsonModels;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace Betonchel.Api.Controllers;
 
