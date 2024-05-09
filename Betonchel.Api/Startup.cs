@@ -6,11 +6,9 @@ using Betonchel.Data.Repositories;
 using Betonchel.Domain.BaseModels;
 using Betonchel.Domain.DBModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-
 
 namespace Betonchel.Api;
 
@@ -90,7 +88,6 @@ public class Startup
 
     private static void AddUrls(IServiceCollection services, IConfiguration configuration)
     {
-        services.AddScoped<CheckUrl>(_ => new CheckUrl(configuration["AuthServer:CheckUrl"]));
         services.AddScoped<RegisterUrl>(_ => new RegisterUrl(configuration["AuthServer:RegisterUrl"]));
     }
 
