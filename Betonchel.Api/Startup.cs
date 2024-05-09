@@ -5,6 +5,7 @@ using Betonchel.Data;
 using Betonchel.Data.Repositories;
 using Betonchel.Domain.BaseModels;
 using Betonchel.Domain.DBModels;
+using Betonchel.Domain.JsonModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -46,13 +47,13 @@ public class Startup
                     ValidateAudience = false,
                     ValidateLifetime = true,
                     RequireExpirationTime = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("secretsecretsecretsecretsecretse")),
+                    IssuerSigningKey =
+                        new SymmetricSecurityKey(Encoding.UTF8.GetBytes("secretsecretsecretsecretsecretse")),
                     ValidateIssuerSigningKey = true,
                 };
             });
 
         AddRepositories(services);
-        services.AddScoped<Authentication>(_ => new Authentication(configuration["AuthServer:RegisterUrl"]));
         services.AddScoped<DataSeeder>();
         services.AddControllers();
 
@@ -87,5 +88,6 @@ public class Startup
         services.AddScoped<IFilterableRepository<User, int>, UserRepository>();
         services.AddScoped<IBaseRepository<ConcretePump, int>, ConcretePumpRepository>();
         services.AddScoped<ApplicationRepository>();
+        services.AddScoped<IBaseRepositoryWithAuth<RegisterUser, string?>, ExternalAuthRepository>();
     }
 }
