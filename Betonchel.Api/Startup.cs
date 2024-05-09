@@ -1,10 +1,14 @@
+using System.Text;
 using Betonchel.Api.SwaggerConfiguration;
 using Betonchel.Api.Utils;
 using Betonchel.Data;
 using Betonchel.Data.Repositories;
 using Betonchel.Domain.BaseModels;
 using Betonchel.Domain.DBModels;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 
@@ -23,7 +27,7 @@ public class Startup
     {
         services.AddDbContext<BetonchelContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
-        
+
         services.AddCors(options =>
         {
             options.AddDefaultPolicy(policy =>
@@ -34,6 +38,21 @@ public class Startup
             });
         });
         
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.RequireHttpsMetadata = false;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("secretsecretsecretsecretsecretse")),
+                    ValidateIssuerSigningKey = true,
+                };
+            });
+        
+
         AddRepositories(services);
         AddUrls(services, configuration);
 
@@ -53,8 +72,14 @@ public class Startup
             app.UseDeveloperExceptionPage();
         }
 
+
         app.UseCors();
         app.UseRouting();
+
+        app.UseAuthentication();
+
+        app.UseAuthorization();
+
 
         app.UseEndpoints(endpoints => endpoints.MapControllers());
 
