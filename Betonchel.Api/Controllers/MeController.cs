@@ -20,7 +20,7 @@ public class MeController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetMe()
     {
-        var email = HttpContext.User.FindFirstValue("email");
+        var email = HttpContext.User.FindFirstValue(ClaimTypes.Email);
 
         if (email == null)
         {

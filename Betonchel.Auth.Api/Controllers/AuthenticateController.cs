@@ -45,7 +45,7 @@ public class AuthenticateController : ControllerBase
         var userRoles = await _userManager.GetRolesAsync(user);
         var authClaims = new List<Claim>
         {
-            new("email", user.Email)
+            new(JwtRegisteredClaimNames.Email, user.Email)
         };
 
         authClaims.AddRange(userRoles.Select(userRole => new Claim("role", userRole)));

@@ -4,9 +4,11 @@ using Betonchel.Domain.BaseModels;
 using Betonchel.Domain.DBModels;
 using Betonchel.Domain.Filters;
 using Betonchel.Domain.JsonModels;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace Betonchel.Api.Controllers;
 
@@ -49,7 +51,7 @@ public class ApplicationController : ControllerBase
     [Route("create")]
     public async Task<IActionResult> Create([FromBody] UserApplication userApplication)
     {
-        var email = HttpContext.User.FindFirstValue("email");
+        var email = HttpContext.User.FindFirstValue(ClaimTypes.Email);
         
         if (email == null)
         {
@@ -92,6 +94,6 @@ public class ApplicationController : ControllerBase
         var status = await _applicationRepository.DeleteBy(id);
         return status is SuccessOperationStatus
             ? Ok(status)
-            : BadRequest(status); 
+            : BadRequest(status);
     }
 }
