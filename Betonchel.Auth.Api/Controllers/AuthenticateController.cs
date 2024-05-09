@@ -21,6 +21,7 @@ public class AuthenticateController : ControllerBase
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IConfiguration _configuration;
+    private readonly JwtSecurityTokenHandler _tokenHandler = new JwtSecurityTokenHandler();
 
     public AuthenticateController(
         UserManager<ApplicationUser> userManager,
@@ -44,7 +45,7 @@ public class AuthenticateController : ControllerBase
         var userRoles = await _userManager.GetRolesAsync(user);
         var authClaims = new List<Claim>
         {
-            new(JwtRegisteredClaimNames.Email, user.Email)
+            new("email", user.Email)
         };
 
         authClaims.AddRange(userRoles.Select(userRole => new Claim("role", userRole)));
@@ -61,7 +62,7 @@ public class AuthenticateController : ControllerBase
 
         return Ok(new LoginSuccess
         {
-            AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
+            AccessToken = _tokenHandler.WriteToken(token),
             RefreshToken = refreshToken,
             Expiration = token.ValidTo
         });
@@ -130,20 +131,23 @@ public class AuthenticateController : ControllerBase
         var accessToken = tokenModel.AccessToken;
         var refreshToken = tokenModel.RefreshToken;
 
-        var principal = GetPrincipalFromExpiredToken(accessToken);
-        if (principal == null)
-            return BadRequest( new InvalidAccessToken());
-        
-        var username = principal.Identity.Name;
+        var token = _tokenHandler.ReadJwtToken(accessToken);
 
-        var user = await _userManager.FindByNameAsync(username);
+        var email = token.Claims.FirstOrDefault(x => x.Type == "email")?.Value;
+
+        if (email == null)
+        {
+            return BadRequest(new InvalidAccessToken());
+        }
+        
+        var user = await _userManager.FindByEmailAsync(email);
 
         if (user == null) return NotFound();
 
         if (user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
             return BadRequest(new InvalidRefreshToken());
 
-        var newAccessToken = CreateToken(principal.Claims.ToList());
+        var newAccessToken = CreateToken(token.Claims.ToList());
         var newRefreshToken = GenerateRefreshToken();
 
         user.RefreshToken = newRefreshToken;
@@ -151,7 +155,7 @@ public class AuthenticateController : ControllerBase
 
         return Ok(new LoginSuccess
         {
-            AccessToken = new JwtSecurityTokenHandler().WriteToken(newAccessToken),
+            AccessToken = _tokenHandler.WriteToken(newAccessToken),
             RefreshToken = newRefreshToken,
             Expiration = newAccessToken.ValidTo
         });
@@ -188,16 +192,7 @@ public class AuthenticateController : ControllerBase
         return Ok(new Success());
     }
 
-    [HttpPost]
-    [Route("check")]
-    [Authorize]
-    public async Task<IActionResult> Check()
-    {
-        return Ok(new Success());
-    }
-
-
-    private JwtSecurityToken CreateToken(List<Claim> authClaims)
+    private JwtSecurityToken CreateToken(IEnumerable<Claim> authClaims)
     {
         var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
         int.TryParse(_configuration["JWT:TokenValidityInMinutes"], out var tokenValidityInMinutes);
@@ -219,26 +214,5 @@ public class AuthenticateController : ControllerBase
         using var rng = RandomNumberGenerator.Create();
         rng.GetBytes(randomNumber);
         return Convert.ToBase64String(randomNumber);
-    }
-
-    private ClaimsPrincipal? GetPrincipalFromExpiredToken(string? token)
-    {
-        var tokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateAudience = false,
-            ValidateIssuer = false,
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"])),
-            ValidateLifetime = false
-        };
-
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
-        if (securityToken is not JwtSecurityToken jwtSecurityToken ||
-            !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
-                StringComparison.InvariantCultureIgnoreCase))
-            throw new SecurityTokenException("Invalid token");
-
-        return principal;
     }
 }
